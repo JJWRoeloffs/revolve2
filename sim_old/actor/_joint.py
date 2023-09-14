@@ -27,15 +27,16 @@ class Joint:
     """Vector the joint rotates about."""
     axis: Vector3
 
+    range: float
     """
     Rotation range of the joint in radians.
     
-    How much it can rotate to each side.
+    How much it can rotate to each side, in radians.
+    So double this is the complete range of motion.
     """
-    range: float
 
-    """Maximum effort the joint can exert."""
     effort: float
+    """Maximum effort the joint can exert, in newton-meter."""
 
-    """Maximum velocity of the joint."""
     velocity: float
+    """Maximum velocity of the joint, in radian per second."""
