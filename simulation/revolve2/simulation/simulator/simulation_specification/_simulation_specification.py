@@ -3,6 +3,7 @@ from ._rigid_body import RigidBody
 from ._joint import Joint
 from ._pose import Pose
 from pyrr import Vector3, Quaternion
+from ._camera import Camera
 
 
 @dataclass
@@ -23,3 +24,4 @@ class SimulationSpecification:
 
     bodies: list[RigidBody] = field(default=list)
     joints: list[Joint] = field(default=list)
+    cameras: list[Camera] = field(default=list)
