@@ -1,6 +1,8 @@
 from pyrr import Vector3
+from dataclasses import dataclass
 
 
+@dataclass
 class AABB:
     size: Vector3
     """

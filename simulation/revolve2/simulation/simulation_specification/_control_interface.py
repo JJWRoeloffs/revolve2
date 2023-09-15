@@ -1,2 +1,0 @@
-class ControlInterface:
-    pass

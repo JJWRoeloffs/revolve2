@@ -3,8 +3,14 @@ from dataclasses import dataclass
 
 import numpy as np
 from pyrr import Quaternion, Vector3
-from revolve2.simulation.actor import Actor, Collision, Joint, RigidBody
-from revolve2.simulation.running._results import ActorState
+from revolve2.simulation.actor import Actor
+from revolve2.simulation.simulation_specification import (
+    RigidBody,
+    JointHinge,
+    GeometryBox,
+    Pose,
+    AABB,
+)
 
 from ._active_hinge import ActiveHinge
 from ._body_state import BodyState
@@ -46,11 +52,11 @@ class Body:
         """
         return self._is_finalized
 
-    def to_actor(self) -> tuple[Actor, list[int]]:
+    def to_actor(self) -> tuple[Actor, dict[ActiveHinge, JointHinge]]:
         """
         Create an actor from this body.
 
-        :returns: (the actor, ids of modules matching the joints in the actor)
+        :returns: (the actor, a map matching active hinge modules to actor hinge joints)
         :raises NotFinalizedError: In case this body has not yet been finalized.
         """
         if not self.is_finalized:
@@ -155,16 +161,17 @@ class Body:
         """
         return _GridMaker().make_grid(self)
 
-    def body_state_from_actor_state(self, actor_state: ActorState) -> BodyState:
-        """
-        Transform an actor state (part of a simulation result) to modular robot body space.
+    # TODO
+    # def body_state_from_actor_state(self, actor_state: ActorState) -> BodyState:
+    #     """
+    #     Transform an actor state (part of a simulation result) to modular robot body space.
 
-        :param actor_state: The actor state to convert from.
-        :returns: The transformed actor state.
-        """
-        return BodyState(
-            core_position=actor_state.position, core_orientation=actor_state.orientation
-        )
+    #     :param actor_state: The actor state to convert from.
+    #     :returns: The transformed actor state.
+    #     """
+    #     return BodyState(
+    #         core_position=actor_state.position, core_orientation=actor_state.orientation
+    #     )
 
 
 class _Finalizer:
@@ -298,11 +305,11 @@ class _ActorBuilder:
     _DYNAMIC_FRICTION = 1.0
 
     robot: Actor
-    dof_ids: list[int]
+    hinge_map: dict[ActiveHinge, JointHinge]
 
-    def build(self, body: Body) -> tuple[Actor, list[int]]:
+    def build(self, body: Body) -> tuple[Actor, dict[ActiveHinge, JointHinge]]:
         self.robot = Actor([], [])
-        self.dof_ids = []
+        self.hinge_map = {}
 
         origin_body = RigidBody(
             "origin",
@@ -315,7 +322,7 @@ class _ActorBuilder:
 
         self._make_module(body.core, origin_body, "origin", Vector3(), Quaternion())
 
-        return (self.robot, self.dof_ids)
+        return (self.robot, self.hinge_map)
 
     def _make_module(
         self,
@@ -367,14 +374,13 @@ class _ActorBuilder:
         # attachment position is always at center of core
         position = attachment_point
 
-        body.collisions.append(
-            Collision(
+        body.geometries.append(
+            GeometryBox(
                 name=f"{name_prefix}_core_collision",
-                position=position,
-                orientation=orientation,
+                pose=Pose(position, orientation),
                 mass=MASS,
-                bounding_box=BOUNDING_BOX,
                 color=module.color,
+                aabb=AABB(BOUNDING_BOX),
             )
         )
 
@@ -416,14 +422,13 @@ class _ActorBuilder:
             [BOUNDING_BOX[0] / 2.0, 0.0, 0.0]
         )
 
-        body.collisions.append(
-            Collision(
+        body.geometries.append(
+            GeometryBox(
                 name=f"{name_prefix}_brick_collision",
-                position=position,
-                orientation=orientation,
+                pose=Pose(position, orientation),
                 mass=MASS,
-                bounding_box=BOUNDING_BOX,
                 color=module.color,
+                aabb=AABB(BOUNDING_BOX),
             )
         )
 
@@ -489,14 +494,13 @@ class _ActorBuilder:
         )
         joint_orientation = body.orientation * orientation
 
-        body.collisions.append(
-            Collision(
+        body.geometries.append(
+            GeometryBox(
                 name=f"{name_prefix}_activehingeframe_collision",
-                position=frame_position_real,
-                orientation=orientation,
+                pose=Pose(frame_position_real, orientation),
                 mass=FRAME_MASS,
-                bounding_box=FRAME_BOUNDING_BOX,
                 color=module.color,
+                bounding_box=AABB(FRAME_BOUNDING_BOX),
             )
         )
 
@@ -509,13 +513,12 @@ class _ActorBuilder:
         )
         self.robot.bodies.append(next_body)
         self.robot.joints.append(
-            Joint(
-                f"{name_prefix}_activehinge",
-                body,
-                next_body,
-                joint_position,
-                joint_orientation,
-                Vector3([0.0, 1.0, 0.0]),
+            JointHinge(
+                name=f"{name_prefix}_activehinge",
+                pose=Pose(joint_position, joint_orientation),
+                body1=body,
+                body2=next_body,
+                axis=Vector3([0.0, 1.0, 0.0]),
                 range=module.RANGE,
                 effort=module.EFFORT,
                 velocity=module.VELOCITY,
@@ -523,24 +526,22 @@ class _ActorBuilder:
         )
         self.dof_ids.append(module.id)
 
-        next_body.collisions.append(
-            Collision(
+        next_body.geometries.append(
+            GeometryBox(
                 name=f"{name_prefix}_activehingemotor_collision1",
-                position=Vector3(),
-                orientation=Quaternion(),
+                pose=Pose(Vector3(), Quaternion()),
                 mass=SERVO1_MASS,
-                bounding_box=SERVO1_BOUNDING_BOX,
                 color=module.color,
+                bounding_box=AABB(SERVO1_BOUNDING_BOX),
             )
         )
-        next_body.collisions.append(
-            Collision(
+        next_body.geometries.append(
+            GeometryBox(
                 name=f"{name_prefix}_activehingemotor_collision2",
-                position=SERVO_BBOX2_POSITION,
-                orientation=Quaternion(),
+                pose=Pose(SERVO_BBOX2_POSITION, Quaternion()),
                 mass=SERVO2_MASS,
-                bounding_box=SERVO2_BOUNDING_BOX,
                 color=module.color,
+                bounding_box=AABB(SERVO2_BOUNDING_BOX),
             )
         )
 

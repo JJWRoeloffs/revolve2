@@ -4,7 +4,7 @@ from ._joint import Joint
 
 
 @dataclass
-class HingeJoint(Joint):
+class JointHinge(Joint):
     """
     A hinge joint, also known as revolute joint.
 
