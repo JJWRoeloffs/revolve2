@@ -1,0 +1,2 @@
+class SimulationState:
+    pass

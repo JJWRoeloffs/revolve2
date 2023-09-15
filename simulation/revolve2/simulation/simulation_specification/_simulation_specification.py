@@ -4,9 +4,10 @@ from ._joint import Joint
 from ._pose import Pose
 from pyrr import Vector3, Quaternion
 from ._camera import Camera
+from ._simulation_handler import SimulationHandler
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SimulationSpecification:
     _root: RigidBody = field(
         default_factory=lambda: RigidBody(
@@ -21,6 +22,8 @@ class SimulationSpecification:
     @property
     def root(self) -> RigidBody:
         return self._root
+
+    handler: SimulationHandler
 
     bodies: list[RigidBody] = field(default=list)
     joints: list[Joint] = field(default=list)
