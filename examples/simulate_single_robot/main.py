@@ -11,7 +11,7 @@ import asyncio
 from revolve2.ci_group import terrains
 from revolve2.ci_group.logging import setup_logging
 from revolve2.ci_group.rng import make_rng
-from revolve2.ci_group.simulation import create_batch_single_robot_standard
+from revolve2.modular_robot.simulation import ModularRobotSimulationSpecification
 from revolve2.modular_robot import ActiveHinge, Body, Brick, ModularRobot, RightAngles
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
 from revolve2.simulators.mujoco import LocalRunner
@@ -58,6 +58,11 @@ def main() -> None:
     brain = BrainCpgNetworkNeighborRandom(rng)
     # Combine the body and brain into a modular robot.
     robot = ModularRobot(body, brain)
+
+    simulation_specification = ModularRobotSimulationSpecification(
+        terrain=terrains.flat()
+    )
+    simulation_specification.add_robot(robot)
 
     # Create a batch containing the robot in a flat terrain.
     # A batch describes a set of simulations to perform.

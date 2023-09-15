@@ -1,18 +1,15 @@
 from dataclasses import dataclass
-from ._color import Color
-from ._pose import Pose
+from .._color import Color
+from .._pose import Pose
 
 
 @dataclass(kw_only=True)
-class ConvexGeometry:
+class Geometry:
     """
-    Convex geometry describing part of a rigid body shape.
+    Geometry describing part of a rigid body shape.
 
     Currently always a box.
     """
-
-    name: str
-    """Name of the geometry."""
 
     pose: Pose
     """Pose of the geometry."""

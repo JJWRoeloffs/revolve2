@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from ._pose import Pose
-from ._convex_geometry import ConvexGeometry
+from ._geometry import Geometry
 
 
 @dataclass
@@ -22,5 +22,5 @@ class RigidBody:
     dynamic_friction: float
     """Dynamic friction of the body."""
 
-    geometries: list[ConvexGeometry] = field(default_factory=list, init=False)
+    geometries: list[Geometry] = field(default_factory=list, init=False)
     """Geometries describing the shape of the body."""
