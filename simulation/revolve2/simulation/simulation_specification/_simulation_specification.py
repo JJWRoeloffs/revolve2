@@ -19,6 +19,6 @@ class SimulationSpecification:
 
     handler: SimulationHandler
 
-    bodies: list[RigidBody] = field(default=list)
-    joints: list[Joint] = field(default=list)
-    cameras: list[Camera] = field(default=list)
+    bodies: list[RigidBody] = field(default_factory=list)
+    joints: list[Joint] = field(default_factory=list)
+    cameras: list[Camera] = field(default_factory=list)

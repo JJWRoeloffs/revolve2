@@ -1,2 +1,8 @@
+from ._joint_hinge import JointHinge
+
+
 class ControlInterface:
-    pass
+    def set_joint_hinge_position_target(
+        self, joint_hinge: JointHinge, position: float
+    ) -> None:
+        raise NotImplementedError()
