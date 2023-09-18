@@ -10,6 +10,7 @@ from revolve2.simulation.simulation_specification.geometry import (
     GeometryPlane,
     GeometryHeightmap,
 )
+from revolve2.simulation.simulation_specification import Pose
 from revolve2.modular_robot.simulation import Terrain
 
 
@@ -23,8 +24,8 @@ def flat(size: Vector3 = Vector3([20.0, 20.0, 0.0])) -> Terrain:
     return Terrain(
         static_geometry=[
             GeometryPlane(
-                position=Vector3(),
-                orientation=Quaternion(),
+                pose=Pose(position=Vector3(), orientation=Quaternion()),
+                mass=0.0,
                 size=size,
             )
         ]
@@ -78,8 +79,8 @@ def crater(
     return Terrain(
         static_geometry=[
             GeometryHeightmap(
-                position=Vector3(),
-                orientation=Quaternion(),
+                Pose(position=Vector3(), orientation=Quaternion()),
+                mass=0.0,
                 size=Vector3([size[0], size[1], max_height]),
                 base_thickness=0.1 + ruggedness,
                 heights=heightmap,

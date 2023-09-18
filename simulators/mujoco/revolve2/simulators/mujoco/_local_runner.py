@@ -64,363 +64,363 @@ class LocalRunner(Simulator):
         self._start_paused = start_paused
         self._num_simulators = num_simulators
 
-    @classmethod
-    def _run_environment(
-        cls,
-        env_index: int,
-        env_descr: Environment,
-        headless: bool,
-        record_settings: RecordSettings | None,
-        start_paused: bool,
-        control_step: float,
-        sample_step: float,
-        simulation_time: int | None,
-        simulation_timestep: float,
-    ) -> EnvironmentResults:
-        logging.info(f"Environment {env_index}")
+    # @classmethod
+    # def _run_environment(
+    #     cls,
+    #     env_index: int,
+    #     env_descr: Environment,
+    #     headless: bool,
+    #     record_settings: RecordSettings | None,
+    #     start_paused: bool,
+    #     control_step: float,
+    #     sample_step: float,
+    #     simulation_time: int | None,
+    #     simulation_timestep: float,
+    # ) -> EnvironmentResults:
+    #     logging.info(f"Environment {env_index}")
 
-        model = cls._make_model(env_descr, simulation_timestep)
+    #     model = cls._make_model(env_descr, simulation_timestep)
 
-        data = mujoco.MjData(model)
+    #     data = mujoco.MjData(model)
 
-        initial_targets = [
-            dof_state
-            for posed_actor in env_descr.actors
-            for dof_state in posed_actor.dof_states
-        ]
-        # Explicitly set the initial angle of every joint to 0.0.
-        cls._set_dof_state(data, model, [0.0 for _ in initial_targets])
-        # Set each degree of freedom target.
-        cls._set_dof_targets(data, initial_targets)
+    #     initial_targets = [
+    #         dof_state
+    #         for posed_actor in env_descr.actors
+    #         for dof_state in posed_actor.dof_states
+    #     ]
+    #     # Explicitly set the initial angle of every joint to 0.0.
+    #     cls._set_dof_state(data, model, [0.0 for _ in initial_targets])
+    #     # Set each degree of freedom target.
+    #     cls._set_dof_targets(data, initial_targets)
 
-        for posed_actor in env_descr.actors:
-            posed_actor.dof_states
+    #     for posed_actor in env_descr.actors:
+    #         posed_actor.dof_states
 
-        if not headless or record_settings is not None:
-            viewer = mujoco_viewer.MujocoViewer(
-                model,
-                data,
-            )
-            viewer._render_every_frame = False  # Private but functionality is not exposed and for now it breaks nothing.
-            viewer._paused = start_paused
+    #     if not headless or record_settings is not None:
+    #         viewer = mujoco_viewer.MujocoViewer(
+    #             model,
+    #             data,
+    #         )
+    #         viewer._render_every_frame = False  # Private but functionality is not exposed and for now it breaks nothing.
+    #         viewer._paused = start_paused
 
-        if record_settings is not None:
-            video_step = 1 / record_settings.fps
-            video_file_path = f"{record_settings.video_directory}/{env_index}.mp4"
-            fourcc = cv2.VideoWriter.fourcc(*"mp4v")
-            video = cv2.VideoWriter(
-                video_file_path,
-                fourcc,
-                record_settings.fps,
-                (viewer.viewport.width, viewer.viewport.height),
-            )
+    #     if record_settings is not None:
+    #         video_step = 1 / record_settings.fps
+    #         video_file_path = f"{record_settings.video_directory}/{env_index}.mp4"
+    #         fourcc = cv2.VideoWriter.fourcc(*"mp4v")
+    #         video = cv2.VideoWriter(
+    #             video_file_path,
+    #             fourcc,
+    #             record_settings.fps,
+    #             (viewer.viewport.width, viewer.viewport.height),
+    #         )
 
-            viewer._hide_menu = True
+    #         viewer._hide_menu = True
 
-        last_control_time = 0.0
-        last_sample_time = 0.0
-        last_video_time = 0.0  # time at which last video frame was saved
+    #     last_control_time = 0.0
+    #     last_sample_time = 0.0
+    #     last_video_time = 0.0  # time at which last video frame was saved
 
-        results = EnvironmentResults([])
+    #     results = EnvironmentResults([])
 
-        # sample initial state
-        results.environment_states.append(
-            EnvironmentState(0.0, cls._get_actor_states(env_descr, data, model))
-        )
+    #     # sample initial state
+    #     results.environment_states.append(
+    #         EnvironmentState(0.0, cls._get_actor_states(env_descr, data, model))
+    #     )
 
-        while (time := data.time) < (
-            float("inf") if simulation_time is None else simulation_time
-        ):
-            # do control if it is time
-            if time >= last_control_time + control_step:
-                last_control_time = math.floor(time / control_step) * control_step
-                control_user = ActorControl()
-                env_descr.controller.control(control_step, control_user)
-                actor_targets = control_user._dof_targets
-                actor_targets.sort(key=lambda t: t[0])
-                targets = [
-                    target
-                    for actor_target in actor_targets
-                    for target in actor_target[1]
-                ]
-                cls._set_dof_targets(data, targets)
+    #     while (time := data.time) < (
+    #         float("inf") if simulation_time is None else simulation_time
+    #     ):
+    #         # do control if it is time
+    #         if time >= last_control_time + control_step:
+    #             last_control_time = math.floor(time / control_step) * control_step
+    #             control_user = ActorControl()
+    #             env_descr.controller.control(control_step, control_user)
+    #             actor_targets = control_user._dof_targets
+    #             actor_targets.sort(key=lambda t: t[0])
+    #             targets = [
+    #                 target
+    #                 for actor_target in actor_targets
+    #                 for target in actor_target[1]
+    #             ]
+    #             cls._set_dof_targets(data, targets)
 
-            # sample state if it is time
-            if time >= last_sample_time + sample_step:
-                last_sample_time = int(time / sample_step) * sample_step
-                results.environment_states.append(
-                    EnvironmentState(
-                        time, cls._get_actor_states(env_descr, data, model)
-                    )
-                )
+    #         # sample state if it is time
+    #         if time >= last_sample_time + sample_step:
+    #             last_sample_time = int(time / sample_step) * sample_step
+    #             results.environment_states.append(
+    #                 EnvironmentState(
+    #                     time, cls._get_actor_states(env_descr, data, model)
+    #                 )
+    #             )
 
-            # step simulation
-            mujoco.mj_step(model, data)
+    #         # step simulation
+    #         mujoco.mj_step(model, data)
 
-            # render if not headless. also render when recording and if it time for a new video frame.
-            if not headless or (
-                record_settings is not None and time >= last_video_time + video_step
-            ):
-                viewer.render()
+    #         # render if not headless. also render when recording and if it time for a new video frame.
+    #         if not headless or (
+    #             record_settings is not None and time >= last_video_time + video_step
+    #         ):
+    #             viewer.render()
 
-            # capture video frame if it's time
-            if record_settings is not None and time >= last_video_time + video_step:
-                last_video_time = int(time / video_step) * video_step
+    #         # capture video frame if it's time
+    #         if record_settings is not None and time >= last_video_time + video_step:
+    #             last_video_time = int(time / video_step) * video_step
 
-                # https://github.com/deepmind/mujoco/issues/285 (see also record.cc)
-                img: npt.NDArray[np.uint8] = np.empty(
-                    (viewer.viewport.height, viewer.viewport.width, 3),
-                    dtype=np.uint8,
-                )
+    #             # https://github.com/deepmind/mujoco/issues/285 (see also record.cc)
+    #             img: npt.NDArray[np.uint8] = np.empty(
+    #                 (viewer.viewport.height, viewer.viewport.width, 3),
+    #                 dtype=np.uint8,
+    #             )
 
-                mujoco.mjr_readPixels(
-                    rgb=img,
-                    depth=None,
-                    viewport=viewer.viewport,
-                    con=viewer.ctx,
-                )
-                img = np.flip(img, axis=0)  # img is upside down initially
-                video.write(img)
+    #             mujoco.mjr_readPixels(
+    #                 rgb=img,
+    #                 depth=None,
+    #                 viewport=viewer.viewport,
+    #                 con=viewer.ctx,
+    #             )
+    #             img = np.flip(img, axis=0)  # img is upside down initially
+    #             video.write(img)
 
-        if not headless or record_settings is not None:
-            viewer.close()
+    #     if not headless or record_settings is not None:
+    #         viewer.close()
 
-        if record_settings is not None:
-            video.release()
+    #     if record_settings is not None:
+    #         video.release()
 
-        # sample one final time
-        results.environment_states.append(
-            EnvironmentState(time, cls._get_actor_states(env_descr, data, model))
-        )
+    #     # sample one final time
+    #     results.environment_states.append(
+    #         EnvironmentState(time, cls._get_actor_states(env_descr, data, model))
+    #     )
 
-        return results
+    #     return results
 
-    async def simulate_batch(self, batch: Batch) -> None:
-        """
-        Run the provided batch by simulating each contained environment.
+    # async def simulate_batch(self, batch: Batch) -> None:
+    #     """
+    #     Run the provided batch by simulating each contained environment.
 
-        :param batch: The batch to run.
-        :param record_settings: Optional settings for recording the runnings. If None, no recording is made.
-        :returns: List of simulation states in ascending order of time.
-        """
-        logging.info("Starting simulation batch with mujoco.")
+    #     :param batch: The batch to run.
+    #     :param record_settings: Optional settings for recording the runnings. If None, no recording is made.
+    #     :returns: List of simulation states in ascending order of time.
+    #     """
+    #     logging.info("Starting simulation batch with mujoco.")
 
-        control_step = 1.0 / batch.parameters.control_frequency
-        sample_step = 1.0 / batch.parameters.sampling_frequency
+    #     control_step = 1.0 / batch.parameters.control_frequency
+    #     sample_step = 1.0 / batch.parameters.sampling_frequency
 
-        if batch.record_settings is not None:
-            os.makedirs(batch.record_settings.video_directory, exist_ok=False)
+    #     if batch.record_settings is not None:
+    #         os.makedirs(batch.record_settings.video_directory, exist_ok=False)
 
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=self._num_simulators
-        ) as executor:
-            futures = [
-                executor.submit(
-                    self._run_environment,
-                    env_index,
-                    env_descr,
-                    self._headless,
-                    batch.record_settings,
-                    self._start_paused,
-                    control_step,
-                    sample_step,
-                    batch.parameters.simulation_time,
-                    batch.parameters.simulation_timestep,
-                )
-                for env_index, env_descr in enumerate(batch.environments)
-            ]
-            results = None  # TODO#BatchResults([future.result() for future in futures])
+    #     with concurrent.futures.ProcessPoolExecutor(
+    #         max_workers=self._num_simulators
+    #     ) as executor:
+    #         futures = [
+    #             executor.submit(
+    #                 self._run_environment,
+    #                 env_index,
+    #                 env_descr,
+    #                 self._headless,
+    #                 batch.record_settings,
+    #                 self._start_paused,
+    #                 control_step,
+    #                 sample_step,
+    #                 batch.parameters.simulation_time,
+    #                 batch.parameters.simulation_timestep,
+    #             )
+    #             for env_index, env_descr in enumerate(batch.environments)
+    #         ]
+    #         results = None  # TODO#BatchResults([future.result() for future in futures])
 
-        logging.info("Finished batch.")
+    #     logging.info("Finished batch.")
 
-        return results
+    #     return results
 
-    @staticmethod
-    def _make_model(
-        env_descr: Environment, simulation_timestep: float = 0.001
-    ) -> mujoco.MjModel:
-        env_mjcf = mjcf.RootElement(model="environment")
+    # @staticmethod
+    # def _make_model(
+    #     env_descr: Environment, simulation_timestep: float = 0.001
+    # ) -> mujoco.MjModel:
+    #     env_mjcf = mjcf.RootElement(model="environment")
 
-        env_mjcf.compiler.angle = "radian"
+    #     env_mjcf.compiler.angle = "radian"
 
-        env_mjcf.option.timestep = simulation_timestep
-        env_mjcf.option.integrator = "RK4"
+    #     env_mjcf.option.timestep = simulation_timestep
+    #     env_mjcf.option.integrator = "RK4"
 
-        env_mjcf.option.gravity = [0, 0, -9.81]
+    #     env_mjcf.option.gravity = [0, 0, -9.81]
 
-        heightmaps: list[geometry.Heightmap] = []
-        for geo in env_descr.static_geometries:
-            if isinstance(geo, geometry.Plane):
-                env_mjcf.worldbody.add(
-                    "geom",
-                    type="plane",
-                    pos=[geo.position.x, geo.position.y, geo.position.z],
-                    size=[geo.size.x / 2.0, geo.size.y / 2.0, 1.0],
-                    rgba=[geo.color.x, geo.color.y, geo.color.z, 1.0],
-                )
-            elif isinstance(geo, geometry.Heightmap):
-                env_mjcf.asset.add(
-                    "hfield",
-                    name=f"hfield_{len(heightmaps)}",
-                    nrow=len(geo.heights),
-                    ncol=len(geo.heights[0]),
-                    size=[geo.size.x, geo.size.y, geo.size.z, geo.base_thickness],
-                )
+    #     heightmaps: list[geometry.Heightmap] = []
+    #     for geo in env_descr.static_geometries:
+    #         if isinstance(geo, geometry.Plane):
+    #             env_mjcf.worldbody.add(
+    #                 "geom",
+    #                 type="plane",
+    #                 pos=[geo.position.x, geo.position.y, geo.position.z],
+    #                 size=[geo.size.x / 2.0, geo.size.y / 2.0, 1.0],
+    #                 rgba=[geo.color.x, geo.color.y, geo.color.z, 1.0],
+    #             )
+    #         elif isinstance(geo, geometry.Heightmap):
+    #             env_mjcf.asset.add(
+    #                 "hfield",
+    #                 name=f"hfield_{len(heightmaps)}",
+    #                 nrow=len(geo.heights),
+    #                 ncol=len(geo.heights[0]),
+    #                 size=[geo.size.x, geo.size.y, geo.size.z, geo.base_thickness],
+    #             )
 
-                env_mjcf.worldbody.add(
-                    "geom",
-                    type="hfield",
-                    hfield=f"hfield_{len(heightmaps)}",
-                    pos=[geo.position.x, geo.position.y, geo.position.z],
-                    quat=[
-                        geo.orientation.x,
-                        geo.orientation.y,
-                        geo.orientation.z,
-                        geo.orientation.w,
-                    ],
-                    # size=[geo.size.x, geo.size.y, 1.0],
-                    rgba=[geo.color.x, geo.color.y, geo.color.z, 1.0],
-                )
-                heightmaps.append(geo)
-            else:
-                raise NotImplementedError()
+    #             env_mjcf.worldbody.add(
+    #                 "geom",
+    #                 type="hfield",
+    #                 hfield=f"hfield_{len(heightmaps)}",
+    #                 pos=[geo.position.x, geo.position.y, geo.position.z],
+    #                 quat=[
+    #                     geo.orientation.x,
+    #                     geo.orientation.y,
+    #                     geo.orientation.z,
+    #                     geo.orientation.w,
+    #                 ],
+    #                 # size=[geo.size.x, geo.size.y, 1.0],
+    #                 rgba=[geo.color.x, geo.color.y, geo.color.z, 1.0],
+    #             )
+    #             heightmaps.append(geo)
+    #         else:
+    #             raise NotImplementedError()
 
-        env_mjcf.worldbody.add(
-            "light",
-            pos=[0, 0, 100],
-            ambient=[0.5, 0.5, 0.5],
-            directional=True,
-            castshadow=False,
-        )
-        env_mjcf.visual.headlight.active = 0
+    #     env_mjcf.worldbody.add(
+    #         "light",
+    #         pos=[0, 0, 100],
+    #         ambient=[0.5, 0.5, 0.5],
+    #         directional=True,
+    #         castshadow=False,
+    #     )
+    #     env_mjcf.visual.headlight.active = 0
 
-        for actor_index, posed_actor in enumerate(env_descr.actors):
-            urdf = physbot_to_urdf(
-                posed_actor.actor,
-                f"robot_{actor_index}",
-                Vector3(),
-                Quaternion(),
-            )
+    #     for actor_index, posed_actor in enumerate(env_descr.actors):
+    #         urdf = physbot_to_urdf(
+    #             posed_actor.actor,
+    #             f"robot_{actor_index}",
+    #             Vector3(),
+    #             Quaternion(),
+    #         )
 
-            model = mujoco.MjModel.from_xml_string(urdf)
+    #         model = mujoco.MjModel.from_xml_string(urdf)
 
-            # mujoco can only save to a file, not directly to string,
-            # so we create a temporary file.
-            try:
-                with tempfile.NamedTemporaryFile(
-                    mode="r+", delete=True, suffix="_mujoco.urdf"
-                ) as botfile:
-                    mujoco.mj_saveLastXML(botfile.name, model)
-                    robot = mjcf.from_file(botfile)
-            # handle an exception when the xml saving fails, it's almost certain to occur on Windows
-            # since NamedTemporaryFile can't be opened twice when the file is still open.
-            except Exception as e:
-                print(repr(e))
-                print(
-                    "Setting 'delete' parameter to False so that the xml can be saved"
-                )
-                with tempfile.NamedTemporaryFile(
-                    mode="r+", delete=False, suffix="_mujoco.urdf"
-                ) as botfile:
-                    # to make sure the temp file is always deleted,
-                    # an error catching is needed, in case the xml saving fails and crashes the program
-                    try:
-                        mujoco.mj_saveLastXML(botfile.name, model)
-                        robot = mjcf.from_file(botfile)
-                        # On Windows, an open file can’t be deleted, and hence it has to be closed first before removing
-                        botfile.close()
-                        os.remove(botfile.name)
-                    except Exception as e:
-                        print(repr(e))
-                        # On Windows, an open file can’t be deleted, and hence it has to be closed first before removing
-                        botfile.close()
-                        os.remove(botfile.name)
+    #         # mujoco can only save to a file, not directly to string,
+    #         # so we create a temporary file.
+    #         try:
+    #             with tempfile.NamedTemporaryFile(
+    #                 mode="r+", delete=True, suffix="_mujoco.urdf"
+    #             ) as botfile:
+    #                 mujoco.mj_saveLastXML(botfile.name, model)
+    #                 robot = mjcf.from_file(botfile)
+    #         # handle an exception when the xml saving fails, it's almost certain to occur on Windows
+    #         # since NamedTemporaryFile can't be opened twice when the file is still open.
+    #         except Exception as e:
+    #             print(repr(e))
+    #             print(
+    #                 "Setting 'delete' parameter to False so that the xml can be saved"
+    #             )
+    #             with tempfile.NamedTemporaryFile(
+    #                 mode="r+", delete=False, suffix="_mujoco.urdf"
+    #             ) as botfile:
+    #                 # to make sure the temp file is always deleted,
+    #                 # an error catching is needed, in case the xml saving fails and crashes the program
+    #                 try:
+    #                     mujoco.mj_saveLastXML(botfile.name, model)
+    #                     robot = mjcf.from_file(botfile)
+    #                     # On Windows, an open file can’t be deleted, and hence it has to be closed first before removing
+    #                     botfile.close()
+    #                     os.remove(botfile.name)
+    #                 except Exception as e:
+    #                     print(repr(e))
+    #                     # On Windows, an open file can’t be deleted, and hence it has to be closed first before removing
+    #                     botfile.close()
+    #                     os.remove(botfile.name)
 
-            for body in posed_actor.actor.bodies:
-                for collision in body.collisions:
-                    robot.find(
-                        "geom", collision.name
-                    ).rgba = collision.color.to_normalized_rgba_list()
+    #         for body in posed_actor.actor.bodies:
+    #             for collision in body.collisions:
+    #                 robot.find(
+    #                     "geom", collision.name
+    #                 ).rgba = collision.color.to_normalized_rgba_list()
 
-            for joint in posed_actor.actor.joints:
-                # Add rotor inertia to joints. This value is arbitrarily chosen and appears stable enough.
-                # Fine-tuning the armature value might be needed later.
-                robot.find(namespace="joint", identifier=joint.name).armature = "0.002"
-                robot.actuator.add(
-                    "position",
-                    kp=5.0,
-                    joint=robot.find(
-                        namespace="joint",
-                        identifier=joint.name,
-                    ),
-                )
-                robot.actuator.add(
-                    "velocity",
-                    kv=0.05,
-                    joint=robot.find(namespace="joint", identifier=joint.name),
-                )
+    #         for joint in posed_actor.actor.joints:
+    #             # Add rotor inertia to joints. This value is arbitrarily chosen and appears stable enough.
+    #             # Fine-tuning the armature value might be needed later.
+    #             robot.find(namespace="joint", identifier=joint.name).armature = "0.002"
+    #             robot.actuator.add(
+    #                 "position",
+    #                 kp=5.0,
+    #                 joint=robot.find(
+    #                     namespace="joint",
+    #                     identifier=joint.name,
+    #                 ),
+    #             )
+    #             robot.actuator.add(
+    #                 "velocity",
+    #                 kv=0.05,
+    #                 joint=robot.find(namespace="joint", identifier=joint.name),
+    #             )
 
-            attachment_frame = env_mjcf.attach(robot)
-            attachment_frame.add("freejoint")
-            attachment_frame.pos = [
-                posed_actor.position.x,
-                posed_actor.position.y,
-                posed_actor.position.z,
-            ]
+    #         attachment_frame = env_mjcf.attach(robot)
+    #         attachment_frame.add("freejoint")
+    #         attachment_frame.pos = [
+    #             posed_actor.position.x,
+    #             posed_actor.position.y,
+    #             posed_actor.position.z,
+    #         ]
 
-            # in mjcf w is first, not last.
-            attachment_frame.quat = [
-                posed_actor.orientation.w,
-                posed_actor.orientation.x,
-                posed_actor.orientation.y,
-                posed_actor.orientation.z,
-            ]
+    #         # in mjcf w is first, not last.
+    #         attachment_frame.quat = [
+    #             posed_actor.orientation.w,
+    #             posed_actor.orientation.x,
+    #             posed_actor.orientation.y,
+    #             posed_actor.orientation.z,
+    #         ]
 
-        xml = env_mjcf.to_xml_string()
-        if not isinstance(xml, str):
-            raise RuntimeError("Error generating mjcf xml.")
+    #     xml = env_mjcf.to_xml_string()
+    #     if not isinstance(xml, str):
+    #         raise RuntimeError("Error generating mjcf xml.")
 
-        model = mujoco.MjModel.from_xml_string(xml)
+    #     model = mujoco.MjModel.from_xml_string(xml)
 
-        # set height map values
-        offset = 0
+    #     # set height map values
+    #     offset = 0
 
-        for heightmap in heightmaps:
-            for x in range(len(heightmap.heights)):
-                for y in range(len(heightmap.heights[0])):
-                    model.hfield_data[
-                        y * len(heightmap.heights) + x
-                    ] = heightmap.heights[x][y]
-            offset += len(heightmap.heights) * len(heightmap.heights[0])
+    #     for heightmap in heightmaps:
+    #         for x in range(len(heightmap.heights)):
+    #             for y in range(len(heightmap.heights[0])):
+    #                 model.hfield_data[
+    #                     y * len(heightmap.heights) + x
+    #                 ] = heightmap.heights[x][y]
+    #         offset += len(heightmap.heights) * len(heightmap.heights[0])
 
-        return model
+    #     return model
 
-    @classmethod
-    def _get_actor_states(
-        cls, env_descr: Environment, data: mujoco.MjData, model: mujoco.MjModel
-    ) -> list[ActorState]:
-        return [
-            cls._get_actor_state(i, data, model) for i in range(len(env_descr.actors))
-        ]
+    # @classmethod
+    # def _get_actor_states(
+    #     cls, env_descr: Environment, data: mujoco.MjData, model: mujoco.MjModel
+    # ) -> list[ActorState]:
+    #     return [
+    #         cls._get_actor_state(i, data, model) for i in range(len(env_descr.actors))
+    #     ]
 
-    @staticmethod
-    def _get_actor_state(
-        robot_index: int, data: mujoco.MjData, model: mujoco.MjModel
-    ) -> ActorState:
-        bodyid = mujoco.mj_name2id(
-            model,
-            mujoco.mjtObj.mjOBJ_BODY,
-            f"robot_{robot_index}/",  # the slash is added by dm_control. ugly but deal with it
-        )
-        assert bodyid >= 0
+    # @staticmethod
+    # def _get_actor_state(
+    #     robot_index: int, data: mujoco.MjData, model: mujoco.MjModel
+    # ) -> ActorState:
+    #     bodyid = mujoco.mj_name2id(
+    #         model,
+    #         mujoco.mjtObj.mjOBJ_BODY,
+    #         f"robot_{robot_index}/",  # the slash is added by dm_control. ugly but deal with it
+    #     )
+    #     assert bodyid >= 0
 
-        qindex = model.body_jntadr[bodyid]
+    #     qindex = model.body_jntadr[bodyid]
 
-        # explicitly copy because the Vector3 and Quaternion classes don't copy the underlying structure
-        position = Vector3([n for n in data.qpos[qindex : qindex + 3]])
-        orientation = Quaternion([n for n in data.qpos[qindex + 3 : qindex + 3 + 4]])
+    #     # explicitly copy because the Vector3 and Quaternion classes don't copy the underlying structure
+    #     position = Vector3([n for n in data.qpos[qindex : qindex + 3]])
+    #     orientation = Quaternion([n for n in data.qpos[qindex + 3 : qindex + 3 + 4]])
 
-        return ActorState(position, orientation)
+    #     return ActorState(position, orientation)
 
     @staticmethod
     def _set_dof_targets(data: mujoco.MjData, targets: list[float]) -> None:

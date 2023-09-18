@@ -5,6 +5,11 @@ from ._joint_hinge import JointHinge
 from ._pose import Pose
 from ._aabb import AABB
 from ._color import Color
+from ._simulation_handler import SimulationHandler
+from ._joint_fixed import JointFixed
+from ._loaded_simulation import LoadedSimulation
+from ._control_interface import ControlInterface
+from ._simulation_state import SimulationState
 
 __all__ = [
     "RigidBody",
@@ -14,4 +19,9 @@ __all__ = [
     "Pose",
     "AABB",
     "Color",
+    "SimulationHandler",
+    "JointFixed",
+    "LoadedSimulation",
+    "ControlInterface",
+    "SimulationState",
 ]

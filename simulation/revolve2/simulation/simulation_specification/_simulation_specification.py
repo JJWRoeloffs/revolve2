@@ -9,19 +9,13 @@ from ._simulation_handler import SimulationHandler
 
 @dataclass(kw_only=True)
 class SimulationSpecification:
-    _root: RigidBody = field(
-        default_factory=lambda: RigidBody(
-            _is_root=True,
-            name="root",
-            pose=Pose(Vector3(), Quaternion()),
-            static_friction=0.0,
-            dynamic_friction=0.0,
-        )
+    ROOT = RigidBody(
+        _is_root=True,
+        name="root",
+        pose=Pose(Vector3(), Quaternion()),
+        static_friction=0.0,
+        dynamic_friction=0.0,
     )
-
-    @property
-    def root(self) -> RigidBody:
-        return self._root
 
     handler: SimulationHandler
 

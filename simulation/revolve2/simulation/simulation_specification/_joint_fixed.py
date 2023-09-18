@@ -3,7 +3,7 @@ from ._joint import Joint
 
 
 @dataclass
-class FixedJoint(Joint):
+class JointFixed(Joint):
     """
     A joint fixing the rigid bodies together rigidly.
 
