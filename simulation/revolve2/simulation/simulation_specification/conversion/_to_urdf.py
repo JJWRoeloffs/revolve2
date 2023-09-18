@@ -1,11 +1,11 @@
 from .._simulation_specification import SimulationSpecification
 
 
-def to_urdf(simspec: SimulationSpecification) -> str:
+def to_urdf(simulation_specification: SimulationSpecification) -> str:
     """
     Converts a simulation specification to URDF.
 
-    :simspec: The simulation specification to convert.
+    :simulation_specification: The simulation specification to convert.
     :returns: The created URDF.
     """
     raise NotImplementedError()

@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from ._geometry import Geometry
+from pyrr import Vector3
+import numpy as np
+import numpy.typing as npt
 
 
-@dataclass
+@dataclass(kw_only=True)
 class GeometryHeightmap(Geometry):
     """
     A heightmap geometry.

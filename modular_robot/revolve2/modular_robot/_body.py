@@ -7,10 +7,10 @@ from revolve2.simulation.actor import Actor
 from revolve2.simulation.simulation_specification import (
     RigidBody,
     JointHinge,
-    GeometryBox,
     Pose,
     AABB,
 )
+from revolve2.simulation.simulation_specification.geometry import GeometryBox
 
 from ._active_hinge import ActiveHinge
 from ._body_state import BodyState

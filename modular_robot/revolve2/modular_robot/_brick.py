@@ -1,4 +1,4 @@
-from revolve2.simulation.actor import Color
+from revolve2.simulation.simulation_specification import Color
 
 from ._module import Module
 from ._right_angles import RightAngles

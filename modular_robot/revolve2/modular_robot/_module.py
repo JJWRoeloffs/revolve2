@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from revolve2.simulation.actor import Color
+from revolve2.simulation.simulation_specification import Color
 
 from ._not_finalized_error import NotFinalizedError
 

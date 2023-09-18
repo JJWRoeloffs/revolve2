@@ -4,6 +4,7 @@ from ._simulation_specification import SimulationSpecification
 from ._joint_hinge import JointHinge
 from ._pose import Pose
 from ._aabb import AABB
+from ._color import Color
 
 __all__ = [
     "RigidBody",
@@ -12,4 +13,5 @@ __all__ = [
     "JointHinge",
     "Pose",
     "AABB",
+    "Color",
 ]

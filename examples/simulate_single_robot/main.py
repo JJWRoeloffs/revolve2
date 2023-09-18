@@ -11,10 +11,14 @@ import asyncio
 from revolve2.ci_group import terrains
 from revolve2.ci_group.logging import setup_logging
 from revolve2.ci_group.rng import make_rng
-from revolve2.modular_robot.simulation import ModularRobotSimulationSpecification
+from revolve2.modular_robot.simulation import (
+    ModularRobotSimulationSpecification,
+    to_batch,
+)
 from revolve2.modular_robot import ActiveHinge, Body, Brick, ModularRobot, RightAngles
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
 from revolve2.simulators.mujoco import LocalRunner
+from revolve2.ci_group.simulation import STANDARD_BATCH_PARAMETERS
 
 
 def make_body() -> Body:
@@ -59,17 +63,17 @@ def main() -> None:
     # Combine the body and brain into a modular robot.
     robot = ModularRobot(body, brain)
 
+    # Create a modular robot simulation specification.
+    # This is a combination of one or more modular robots positioned in a given terrain.
     simulation_specification = ModularRobotSimulationSpecification(
         terrain=terrains.flat()
     )
     simulation_specification.add_robot(robot)
-
-    # Create a batch containing the robot in a flat terrain.
+    # Convert the specification to batch.
     # A batch describes a set of simulations to perform.
     # In this case there is a single simulation containing a single robot.
-    # We use the 'standard' parameters for robot simulation.
-    # You probably don't have to worry about this, but if you are interested, take a look inside the function.
-    batch = create_batch_single_robot_standard(robot=robot, terrain=terrains.flat())
+    # We use the 'standard' CI group parameters for robot simulation.
+    batch = to_batch(simulation_specification, STANDARD_BATCH_PARAMETERS)
 
     # Create a runner that will perform the simulation.
     # This tutorial chooses to use Mujoco, but your version of revolve might contain other simulators as well.

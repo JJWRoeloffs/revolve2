@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from ._pose import Pose
-from ._geometry import Geometry
+from .geometry import Geometry
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RigidBody:
     """A collection of geometries and physics parameters."""
 

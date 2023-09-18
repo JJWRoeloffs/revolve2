@@ -28,22 +28,11 @@ except Exception as e:
     pass
 
 from pyrr import Quaternion, Vector3
-from revolve2.simulation.actor.urdf import to_urdf as physbot_to_urdf
-from revolve2.simulation.running import (
-    ActorControl,
-    ActorState,
-    Batch,
-    BatchResults,
-    Environment,
-    EnvironmentResults,
-    EnvironmentState,
-    RecordSettings,
-    Runner,
-    geometry,
-)
+from revolve2.simulation.simulation_specification.conversion import to_urdf
+from revolve2.simulation.simulator import Simulator, Batch
 
 
-class LocalRunner(Runner):
+class LocalRunner(Simulator):
     """Runner for simulating using Mujoco."""
 
     _headless: bool
@@ -206,9 +195,7 @@ class LocalRunner(Runner):
 
         return results
 
-    async def run_batch(
-        self, batch: Batch, record_settings: RecordSettings | None = None
-    ) -> BatchResults:
+    async def simulate_batch(self, batch: Batch) -> None:
         """
         Run the provided batch by simulating each contained environment.
 
@@ -218,11 +205,11 @@ class LocalRunner(Runner):
         """
         logging.info("Starting simulation batch with mujoco.")
 
-        control_step = 1 / batch.control_frequency
-        sample_step = 1 / batch.sampling_frequency
+        control_step = 1.0 / batch.parameters.control_frequency
+        sample_step = 1.0 / batch.parameters.sampling_frequency
 
-        if record_settings is not None:
-            os.makedirs(record_settings.video_directory, exist_ok=False)
+        if batch.record_settings is not None:
+            os.makedirs(batch.record_settings.video_directory, exist_ok=False)
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self._num_simulators
@@ -233,16 +220,16 @@ class LocalRunner(Runner):
                     env_index,
                     env_descr,
                     self._headless,
-                    record_settings,
+                    batch.record_settings,
                     self._start_paused,
                     control_step,
                     sample_step,
-                    batch.simulation_time,
-                    batch.simulation_timestep,
+                    batch.parameters.simulation_time,
+                    batch.parameters.simulation_timestep,
                 )
                 for env_index, env_descr in enumerate(batch.environments)
             ]
-            results = BatchResults([future.result() for future in futures])
+            results = None  # TODO#BatchResults([future.result() for future in futures])
 
         logging.info("Finished batch.")
 
