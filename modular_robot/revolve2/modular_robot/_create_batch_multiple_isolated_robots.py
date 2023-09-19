@@ -23,10 +23,10 @@ def create_batch_multiple_isolated_robots(
     :param control_frequency: See `Batch` class.
     :returns: The created batch.
     """
-    actor_controllers = [robot.make_actor_and_controller() for robot in robots]
+    brains = [robot.make_actor_and_controller() for robot in robots]
     envs = [
         create_environment_single_actor(actor, controller, terrain)
-        for (actor, controller), terrain in zip(actor_controllers, terrains)
+        for (actor, controller), terrain in zip(brains, terrains)
     ]
 
     batch = Batch(

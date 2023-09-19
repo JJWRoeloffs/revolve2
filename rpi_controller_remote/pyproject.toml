@@ -18,7 +18,6 @@ packages = [{ include = "revolve2" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-revolve2-serialization = { path = "../serialization", develop = true }
 asyncssh = "^2.9.0"
 
 [tool.poetry.extras]

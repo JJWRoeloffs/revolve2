@@ -17,7 +17,7 @@ from revolve2.modular_robot.simulation import (
 )
 from revolve2.modular_robot import ActiveHinge, Body, Brick, ModularRobot, RightAngles
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
-from revolve2.simulators.mujoco import LocalRunner
+from revolve2.simulators.mujoco import LocalSimulator
 from revolve2.ci_group.simulation import STANDARD_BATCH_PARAMETERS
 
 
@@ -59,7 +59,7 @@ def main() -> None:
     body = make_body()
     # Create a brain for the robot.
     # We choose a 'CPG' brain with random parameters (the exact working will not be explained here).
-    brain = BrainCpgNetworkNeighborRandom(rng)
+    brain = BrainCpgNetworkNeighborRandom(body=body, rng=rng)
     # Combine the body and brain into a modular robot.
     robot = ModularRobot(body, brain)
 
@@ -77,11 +77,11 @@ def main() -> None:
 
     # Create a runner that will perform the simulation.
     # This tutorial chooses to use Mujoco, but your version of revolve might contain other simulators as well.
-    runner = LocalRunner()
+    runner = LocalSimulator()
     # Here we use the runner to run a batch.
     # Once a runner finishes a batch, it can be reused to run a new batch.
     # (We only run one batch in this tutorial, so we only use the runner once.)
-    asyncio.run(runner.run_batch(batch))
+    asyncio.run(runner.simulate_batch(batch))
 
 
 if __name__ == "__main__":

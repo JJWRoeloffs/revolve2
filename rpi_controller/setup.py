@@ -15,7 +15,7 @@ setup(
     url="https://github.com/ci-group/revolve2",
     packages=find_namespace_packages(),
     install_requires=[
-        f"revolve2-actor-controller @ file://{os.path.join(revolve2_path, 'actor_controller')}",
+        f"revolve2-controllers @ file://{os.path.join(revolve2_path, 'brain')}",
         "pigpio==1.78",
         "jsonschema==4.4.0",
         "adafruit-circuitpython-servokit==1.3.10",

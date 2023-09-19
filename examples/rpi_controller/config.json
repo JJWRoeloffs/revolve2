@@ -1,7 +1,7 @@
 {
     "hardware": "hatv1",
-    "controller_module": "revolve2.actor_controllers.cpg",
-    "controller_type": "CpgActorController",
+    "controller_module": "revolve2.controllers.cpg",
+    "controller_type": "CpgBrain",
     "control_frequency": 10,
     "gpio": [
         {

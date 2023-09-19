@@ -20,7 +20,9 @@ class SimulationHandler(ABC):
         pass
 
     @abstractmethod
-    def handle(self, state: SimulationState, control: ControlInterface) -> None:
+    def handle(
+        self, state: SimulationState, control: ControlInterface, dt: float
+    ) -> None:
         """
         Handle a simulation frame
 

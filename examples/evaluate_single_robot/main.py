@@ -15,7 +15,7 @@ from revolve2.ci_group.rng import make_rng
 from revolve2.ci_group.simulation import create_batch_single_robot_standard
 from revolve2.modular_robot import ModularRobot, get_body_states_single_robot
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
-from revolve2.simulators.mujoco import LocalRunner
+from revolve2.simulators.mujoco import LocalSimulator
 
 
 def main() -> None:
@@ -37,7 +37,7 @@ def main() -> None:
 
     # Create the runner.
     # We set the headless parameters, which will run the simulation as fast as possible.
-    runner = LocalRunner(headless=True)
+    runner = LocalSimulator(headless=True)
     # Running the batch returns simulation results.
     results = asyncio.run(runner.run_batch(batch))
 

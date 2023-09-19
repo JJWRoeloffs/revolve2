@@ -21,7 +21,7 @@ revolve2_rpi_controller = "revolve2.bin.rpi_controller.revolve2_rpi_controller:m
 
 [tool.poetry.dependencies]
 python = "^3.10"
-revolve2-actor-controller = { path = "../actor_controller", develop = true }
+revolve2-controllers = { path = "../controllers", develop = true }
 pigpio = "^1.78"
 jsonschema = "^4.4.0"
 adafruit-circuitpython-servokit = "^1.3.10"

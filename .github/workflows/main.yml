@@ -17,10 +17,8 @@ jobs:
           . .venv/bin/activate
       # Do this in reverse order of the things depending on each other.
       # Probably gives us the best failure insights.
-      - name: install serialization
-        run: pip install ./serialization
-      - name: install actor_controller
-        run: pip install ./actor_controller
+      - name: install brains
+        run: pip install ./brains
       - name: install simulation
         run: pip install ./simulation
       - name: install modular_robot
@@ -75,10 +73,8 @@ jobs:
           pip install virtualenv
           virtualenv .venv
           . .venv/bin/activate
-      - name: install serialization
-        run: pip install ./serialization[dev]
-      - name: install actor_controller
-        run: pip install ./actor_controller[dev]
+      - name: install brains
+        run: pip install ./brains[dev]
       - name: install simulation
         run: pip install ./simulation[dev]
       - name: install modular_robot
@@ -115,10 +111,8 @@ jobs:
           pip install virtualenv
           virtualenv .venv
           . .venv/bin/activate
-      - name: install serialization
-        run: pip install ./serialization
-      - name: install actor_controller
-        run: pip install ./actor_controller
+      - name: install brains
+        run: pip install ./brains
       - name: install simulation
         run: pip install ./simulation
       - name: install modular_robot

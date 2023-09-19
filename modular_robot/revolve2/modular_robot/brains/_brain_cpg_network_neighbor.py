@@ -1,12 +1,15 @@
 import math
 from abc import ABC, abstractmethod
 
-from revolve2.actor_controller import ActorController
-from revolve2.actor_controllers.cpg import CpgActorController as ControllerCpg
+from revolve2.controllers import Controller
+from revolve2.controllers.cpg import ControllerCpg
 from revolve2.modular_robot import ActiveHinge, Body, Brain
 
 from ._make_cpg_network_structure_neighbor import (
     active_hinges_to_cpg_network_structure_neighbor,
+)
+from .._controller_output_index_to_active_hinge_map import (
+    ControllerOutputIndexToActiveHingeMap,
 )
 
 
@@ -17,20 +20,15 @@ class BrainCpgNetworkNeighbor(Brain, ABC):
     That means, NOT grid coordinates, but tree distance.
     """
 
-    def make_controller(self, body: Body, dof_ids: list[int]) -> ActorController:
-        """
-        Create a controller for the provided body.
+    _body: Body
 
-        :param body: The body to make the brain for.
-        :param dof_ids: Map from actor joint index to module id.
-        :returns: The created controller.
-        """
-        # get active hinges and sort them according to dof_ids
-        active_hinges_unsorted = body.find_active_hinges()
-        active_hinge_map = {
-            active_hinge.id: active_hinge for active_hinge in active_hinges_unsorted
-        }
-        active_hinges = [active_hinge_map[id] for id in dof_ids]
+    def __init__(self, body: Body) -> None:
+        self._body = body
+
+    def make_controller(
+        self,
+    ) -> tuple[Controller, ControllerOutputIndexToActiveHingeMap]:
+        active_hinges = self._body.find_active_hinges()
 
         cpg_network_structure = active_hinges_to_cpg_network_structure_neighbor(
             active_hinges
@@ -44,7 +42,7 @@ class BrainCpgNetworkNeighbor(Brain, ABC):
         ]
 
         (internal_weights, external_weights) = self._make_weights(
-            active_hinges, connections, body
+            active_hinges, connections, self._body
         )
         weight_matrix = cpg_network_structure.make_connection_weights_matrix(
             {
@@ -61,8 +59,20 @@ class BrainCpgNetworkNeighbor(Brain, ABC):
         initial_state = cpg_network_structure.make_uniform_state(0.5 * math.sqrt(2))
         dof_ranges = cpg_network_structure.make_uniform_dof_ranges(1.0)
 
-        return ControllerCpg(
-            initial_state, cpg_network_structure.num_cpgs, weight_matrix, dof_ranges
+        output_indices = cpg_network_structure.output_indices
+
+        index_map = ControllerOutputIndexToActiveHingeMap()
+        for i, active_hinge in enumerate(active_hinges):
+            index_map.add(i, active_hinge)
+
+        return (
+            ControllerCpg(
+                initial_state=initial_state,
+                weight_matrix=weight_matrix,
+                dof_ranges=dof_ranges,
+                outputs=output_indices,
+            ),
+            index_map,
         )
 
     @abstractmethod

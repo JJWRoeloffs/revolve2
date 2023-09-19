@@ -1,7 +1,7 @@
 =======================
 Raspberry Pi controller
 =======================
-This package provides a CLI tool for mapping a Revolve2 ``ActorController`` to physical servos on a Raspberry Pi.
+This package provides a CLI tool for mapping a Revolve2 ``Brain`` to physical servos on a Raspberry Pi.
 
 -------------
 Prerequisites

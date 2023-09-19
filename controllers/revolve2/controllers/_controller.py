@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from ._controller_output_id import ControllerOutputId
 
 
-class Brain(ABC):
-    """Interface for brains, which is another word for 'controller'."""
+class Controller(ABC):
+    """Interface for controllers."""
 
     @abstractmethod
     def step(self, dt: float) -> None:
@@ -17,7 +17,7 @@ class Brain(ABC):
         pass
 
     @abstractmethod
-    def get_outputs(self) -> list[tuple[ControllerOutputId, float]]:
+    def get_outputs(self) -> list[float]:
         """
         Get the outputs of the controller.
 

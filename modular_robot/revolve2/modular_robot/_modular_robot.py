@@ -1,8 +1,5 @@
-from revolve2.actor_controller import ActorController
-from revolve2.simulation.actor import Actor
-
-from ._body import Body
 from ._brain import Brain
+from ._body import Body
 
 
 class ModularRobot:
@@ -20,13 +17,3 @@ class ModularRobot:
         """
         self.body = body
         self.brain = brain
-
-    def make_actor_and_controller(self) -> tuple[Actor, ActorController]:
-        """
-        Transform this modular robot into a physics actor and corresponding controller.
-
-        :returns: (the actor, the controller)
-        """
-        actor, dof_ids = self.body.to_actor()
-        controller = self.brain.make_controller(self.body, dof_ids)
-        return (actor, controller)

@@ -18,7 +18,7 @@ packages = [{ include = "revolve2" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-revolve2-actor-controller = { path = "../actor_controller", develop = true }
+revolve2-controllers = { path = "../controllers", develop = true }
 revolve2-simulation = { path = "../simulation", develop = true }
 pyrr = "^0.10.3"
 numpy = "^1.21.2"

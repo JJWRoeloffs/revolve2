@@ -1,5 +1,5 @@
 #!/bin/sh
 
 cd "$(dirname "$0")"
-echo "serialization:"
+echo "brains:"
 mypy -p revolve2

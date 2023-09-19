@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 import asyncssh.connection
-from revolve2.serialization import StaticData
 
 
 class RpiControllerError(Exception):

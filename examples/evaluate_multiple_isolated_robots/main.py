@@ -20,7 +20,7 @@ from revolve2.modular_robot import (
     get_body_states_multiple_isolated_robots,
 )
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
-from revolve2.simulators.mujoco import LocalRunner
+from revolve2.simulators.mujoco import LocalSimulator
 
 
 def main() -> None:
@@ -54,7 +54,7 @@ def main() -> None:
     # While a runner runs one batch at a time, multiple simulations in that batch might be ran in parallel.
     # In case of the Mujoco runner, see the 'num_simulators' argument.
     # Increasing this number causes it to run more simulations at the same time.
-    runner = LocalRunner(headless=True, num_simulators=4)
+    runner = LocalSimulator(headless=True, num_simulators=4)
 
     # Run the batch and get the results
     results = asyncio.run(runner.run_batch(batch))

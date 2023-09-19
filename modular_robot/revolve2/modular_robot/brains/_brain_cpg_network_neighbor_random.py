@@ -9,12 +9,13 @@ class BrainCpgNetworkNeighborRandom(BrainCpgNetworkNeighbor):
 
     _rng: np.random.Generator
 
-    def __init__(self, rng: np.random.Generator) -> None:
+    def __init__(self, body: Body, rng: np.random.Generator) -> None:
         """
         Initialize this object.
 
         :param rng: Random number generator used for generating the weights.
         """
+        super().__init__(body)
         self._rng = rng
 
     def _make_weights(

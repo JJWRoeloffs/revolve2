@@ -10,7 +10,7 @@ from revolve2.modular_robot import (
 )
 from revolve2.simulation import Terrain
 from revolve2.simulation.running import Runner
-from revolve2.simulators.mujoco import LocalRunner
+from revolve2.simulators.mujoco import LocalSimulator
 
 
 class Evaluator:
@@ -30,7 +30,7 @@ class Evaluator:
         :param headless: `headless` parameter for the physics runner.
         :param num_simulators: `num_simulators` parameter for the physics runner.
         """
-        self._runner = LocalRunner(headless=headless, num_simulators=num_simulators)
+        self._runner = LocalSimulator(headless=headless, num_simulators=num_simulators)
         self._terrain = terrains.flat()
 
     def evaluate(

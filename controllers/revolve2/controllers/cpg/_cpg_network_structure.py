@@ -177,3 +177,7 @@ class CpgNetworkStructure:
         :returns: The array of dof ranges.
         """
         return np.full(self.num_cpgs, value)
+
+    @property
+    def output_indices(self) -> list[int]:
+        return [i for i in range(self.num_cpgs)]

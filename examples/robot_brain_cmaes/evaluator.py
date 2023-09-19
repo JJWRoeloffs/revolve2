@@ -5,7 +5,7 @@ import math
 
 import numpy as np
 import numpy.typing as npt
-from revolve2.actor_controllers.cpg import CpgNetworkStructure
+from revolve2.controllers.cpg import CpgNetworkStructure
 from revolve2.ci_group import fitness_functions, terrains
 from revolve2.ci_group.simulation import create_batch_multiple_isolated_robots_standard
 from revolve2.modular_robot import (
@@ -16,7 +16,7 @@ from revolve2.modular_robot import (
 from revolve2.modular_robot.brains import BrainCpgNetworkStatic
 from revolve2.simulation import Terrain
 from revolve2.simulation.running import Runner
-from revolve2.simulators.mujoco import LocalRunner
+from revolve2.simulators.mujoco import LocalSimulator
 
 
 class Evaluator:
@@ -42,7 +42,7 @@ class Evaluator:
         :param cpg_network_structure: Cpg structure for the brain.
         :param body:Modular body of the robot.
         """
-        self._runner = LocalRunner(headless=headless, num_simulators=num_simulators)
+        self._runner = LocalSimulator(headless=headless, num_simulators=num_simulators)
         self._terrain = terrains.flat()
         self._cpg_network_structure = cpg_network_structure
         self._body = body

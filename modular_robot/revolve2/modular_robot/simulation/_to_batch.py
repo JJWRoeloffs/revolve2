@@ -17,14 +17,20 @@ from ._modular_robot_simulation_specification import (
     ModularRobotSimulationSpecification,
     Terrain,
 )
-from .. import ActiveHinge, Brain, Module, Core, Brick, Body
+from .. import ActiveHinge, Module, Core, Brick, Body
 from .._modular_robot_active_hinge_to_simulation_joint_hinge_map import (
     ModularRobotActiveHingeToSimulationJointHingeMap,
 )
-from .._dof_id_to_simulation_joint_hinge_map import DofIdToSimulationJointHingeMap
 from pyrr import Vector3, Quaternion
 import math
-from revolve2.actor_controller import ActorController
+from revolve2.controllers import Controller
+from .._brain import Brain
+from .._modular_robot_active_hinge_to_controller_output_id_map import (
+    ModularRobotActiveHingeToControllerOutputIdMap,
+)
+from .._controller_output_index_to_active_hinge_map import (
+    ControllerOutputIndexToActiveHingeMap,
+)
 
 
 def to_batch(
@@ -77,38 +83,54 @@ def _prepare_terrain(
 
 
 class _ModularRobotSimulationHandler(SimulationHandler):
-    _actor_controllers: list[tuple[ActorController, DofIdToSimulationJointHingeMap]]
+    _controllers: list[
+        tuple[
+            Controller,
+            ModularRobotActiveHingeToSimulationJointHingeMap,
+            ControllerOutputIndexToActiveHingeMap,
+        ]
+    ]
 
     def __init__(self) -> None:
-        self._actor_controllers = []
+        self._controllers = []
 
     def add_robot(
         self,
         brain: Brain,
         modular_robot_active_hinge_to_simulation_joint_hinge_mapping: ModularRobotActiveHingeToSimulationJointHingeMap,
     ) -> None:
-        controller, dof_id_to_simulation_joint_hinge_mapping = brain.make_controller(
-            modular_robot_active_hinge_to_simulation_joint_hinge_mapping
-        )
-        self._actor_controllers.append(
-            (controller, dof_id_to_simulation_joint_hinge_mapping)
+        (
+            controller,
+            controller_output_index_to_active_hinge_mapping,
+        ) = brain.make_controller()
+        self._controllers.append(
+            (
+                controller,
+                modular_robot_active_hinge_to_simulation_joint_hinge_mapping,
+                controller_output_index_to_active_hinge_mapping,
+            )
         )
 
     def setup(self, loaded_simulation: LoadedSimulation) -> None:
         pass
 
     def handle(
-        self, df: float, state: SimulationState, control: ControlInterface
+        self, state: SimulationState, control: ControlInterface, dt: float
     ) -> None:
         for (
-            actor_controller,
-            dof_id_to_simulation_joint_hinge_mapping,
-        ) in self._actor_controllers:
-            actor_controller.step(df)
-            targets = actor_controller.get_dof_targets()
-            for dof_id, position_target in enumerate(targets):
-                joint_hinge = dof_id_to_simulation_joint_hinge_mapping.map(dof_id)
-                control.set_joint_hinge_position_target(joint_hinge, position_target)
+            controller,
+            modular_robot_active_hinge_to_simulation_joint_hinge_mapping,
+            controller_output_index_to_active_hinge_mapping,
+        ) in self._controllers:
+            controller.step(dt)
+            outputs = controller.get_outputs()
+            for i, output in enumerate(outputs):
+                joint_hinge = (
+                    modular_robot_active_hinge_to_simulation_joint_hinge_mapping.map(
+                        controller_output_index_to_active_hinge_mapping.map(i)
+                    )
+                )
+                control.set_joint_hinge_position_target(joint_hinge, output)
 
 
 class _BodyConverter:

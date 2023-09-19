@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
-from revolve2.actor_controller import ActorController
-from revolve2.actor_controllers.cpg import CpgActorController as ControllerCpg
-from revolve2.actor_controllers.cpg import CpgNetworkStructure
-from revolve2.modular_robot import Body, Brain
+from revolve2.controllers import Controller
+from .._controller_output_index_to_active_hinge_map import (
+    ControllerOutputIndexToActiveHingeMap,
+)
+from revolve2.controllers.cpg import ControllerCpg, CpgNetworkStructure
+from revolve2.modular_robot import Brain
 
 
 class BrainCpgNetworkStatic(Brain):
@@ -19,29 +21,29 @@ class BrainCpgNetworkStatic(Brain):
     """
 
     _initial_state: npt.NDArray[np.float_]
-    _num_output_neurons: int
     _weight_matrix: npt.NDArray[np.float_]
     _dof_ranges: npt.NDArray[np.float_]
+    _outputs: list[int]
 
     def __init__(
         self,
         initial_state: npt.NDArray[np.float_],
-        num_output_neurons: int,
         weight_matrix: npt.NDArray[np.float_],
         dof_ranges: npt.NDArray[np.float_],
+        outputs: list[int],
     ) -> None:
         """
         Initialize this object.
 
-        :param initial_state: The initial state of each neuron.
-        :param num_output_neurons: The number of outputs.
-        :param weight_matrix: Matrix describing the weights between the neurons.
+        :param initial_state: The initial state of the neural network.
+        :param weight_matrix: The weight matrix used during integration.
         :param dof_ranges: Maximum range (half the complete range) of the output of degrees of freedom.
+        :param outputs: Marks neurons as controller outputs. `get_outputs` will return the values of these neurons, in order of this parameter.
         """
         self._initial_state = initial_state
-        self._num_output_neurons = num_output_neurons
         self._weight_matrix = weight_matrix
         self._dof_ranges = dof_ranges
+        self._outputs = outputs
 
     @classmethod
     def create_simple(
@@ -68,23 +70,18 @@ class BrainCpgNetworkStatic(Brain):
         )
         dof_ranges = cpg_network_structure.make_uniform_dof_ranges(dof_range_uniform)
         return BrainCpgNetworkStatic(
-            initial_state,
-            cpg_network_structure.num_cpgs,
-            weight_matrix,
-            dof_ranges,
+            initial_state=initial_state,
+            weight_matrix=weight_matrix,
+            dof_ranges=dof_ranges,
+            outputs=cpg_network_structure.output_indices,
         )
 
-    def make_controller(self, body: Body, dof_ids: list[int]) -> ActorController:
-        """
-        Create a controller from this brain.
-
-        :param body: Body is provided by the parent class but is not used in this implementation.
-        :param dof_ids: Dof_ids is provided by the parent class but is not used in this implementation.
-        :returns: The created controller.
-        """
+    def make_controller(
+        self,
+    ) -> tuple[Controller, ControllerOutputIndexToActiveHingeMap]:
         return ControllerCpg(
-            self._initial_state,
-            self._num_output_neurons,
-            self._weight_matrix,
-            self._dof_ranges,
+            initial_state=self._initial_state,
+            weight_matrix=self._weight_matrix,
+            dof_ranges=self._dof_ranges,
+            outputs=self._outputs,
         )

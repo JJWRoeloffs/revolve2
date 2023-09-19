@@ -1,28 +1,28 @@
-"""Contains EnvironmentActorController, an environment controller for an environment with a single actor that uses a provided ActorController."""
+"""Contains EnvironmentBrain, an environment controller for an environment with a single actor that uses a provided Brain."""
 
-from revolve2.actor_controller import ActorController
+from revolve2.controllers import Brain
 from revolve2.simulation.running import ActorControl, EnvironmentController
 
 
-class EnvironmentActorController(EnvironmentController):
-    """An environment controller for an environment with a single actor that uses a provided ActorController."""
+class EnvironmentBrain(EnvironmentController):
+    """An environment controller for an environment with a single actor that uses a provided Brain."""
 
-    actor_controller: ActorController
+    brain: Brain
 
-    def __init__(self, actor_controller: ActorController) -> None:
+    def __init__(self, brain: Brain) -> None:
         """
         Initialize this object.
 
-        :param actor_controller: The actor controller to use for the single actor in the environment.
+        :param brain: The actor controller to use for the single actor in the environment.
         """
-        self.actor_controller = actor_controller
+        self.brain = brain
 
     def control(self, dt: float, actor_control: ActorControl) -> None:
         """
-        Control the single actor in the environment using an ActorController.
+        Control the single actor in the environment using an Brain.
 
         :param dt: Time since last call to this function.
         :param actor_control: Object used to interface with the environment.
         """
-        self.actor_controller.step(dt)
-        actor_control.set_dof_targets(0, self.actor_controller.get_dof_targets())
+        self.brain.step(dt)
+        actor_control.set_dof_targets(0, self.brain.get_dof_targets())

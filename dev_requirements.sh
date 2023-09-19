@@ -12,8 +12,7 @@ pip install -e ./rpi_controller_remote[dev] && \
 pip install -e ./rpi_controller[dev] && \
 pip install -e ./modular_robot[dev] && \
 pip install -e ./simulation[dev] && \
-pip install -e ./actor_controller[dev] && \
-pip install -e ./serialization[dev] && \
+pip install -e ./controllers[dev] && \
 pip install -r ./codetools/requirements.txt
 pip install -r ./docs/requirements.txt
 pip install -r ./examples/robot_bodybrain_ea_database/requirements.txt

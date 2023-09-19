@@ -1,5 +1,5 @@
 """
-Script to run an ActorController on a Raspberry Pi.
+Script to run an Brain on a Raspberry Pi.
 
 Installed as ``revolve2_rpi_controller``.
 See ``revolve2_rpi_controller --help`` for usage.
@@ -17,8 +17,7 @@ from typing import Any, cast
 import jsonschema
 import pigpio
 from adafruit_servokit import ServoKit
-from revolve2.actor_controller import ActorController
-from revolve2.serialization import StaticData
+from revolve2.controllers import Brain
 
 
 class Program:
@@ -67,7 +66,7 @@ class Program:
     _dry: bool  # if true, gpio output is skipped.
     _log_file: str | None
 
-    _controller: ActorController
+    _controller: Brain
     _control_period: float
     _pins: list[_Pin]
 
@@ -184,8 +183,8 @@ class Program:
         controller_module = importlib.import_module(self._config["controller_module"])
         controller_type = getattr(controller_module, self._config["controller_type"])
 
-        if not issubclass(controller_type, ActorController):
-            raise ValueError("Controller is not an ActorController")
+        if not issubclass(controller_type, Brain):
+            raise ValueError("Controller is not an Brain")
 
         self._controller = controller_type.deserialize(
             self._config["serialized_controller"]
