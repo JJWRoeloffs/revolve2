@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from typing import Iterable, Optional, List, Tuple, Union
+from typing_extensions import Self
 
 from revolve2.modular_robot import (
     Directions,
@@ -39,6 +40,23 @@ class Node(ABC):
             if child is not None
         ]
 
+    def subnodes(self) -> Iterable[Tuple[Node, int]]:
+        def inner(node: Node, depth: int) -> Iterable[Tuple[Node, int]]:
+            yield node, depth
+            for _, child in node.children:
+                yield from inner(child, depth + 1)
+
+        return inner(self, 0)
+
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, self.__class__):
+            return all(
+                ochild == vchild
+                for ochild, vchild in zip(self._children, __value._children)
+            )
+
+        return NotImplemented
+
     def to_module(self) -> Module:
         ret = self._association(RightAngles.RAD_0)
         for i, child in enumerate(self._children):
@@ -46,7 +64,7 @@ class Node(ABC):
                 ret.set_child(child.to_module(), Directions(i))
         return ret
 
-    def copy(self) -> Node:
+    def copy(self) -> Self:
         return self.__class__((d, c.copy()) for d, c in self.children)
 
     @property
