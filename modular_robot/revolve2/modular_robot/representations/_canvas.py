@@ -99,7 +99,7 @@ class Canvas:
     def draw_controller(self, mod_id: int | str):
         """Draw a controller (yellow) in the middle of the canvas"""
         self.context.rectangle(self.x_pos, self.y_pos, 1, 1)
-        self.context.set_source_rgb(255, 255, 0)
+        self.context.set_source_rgb(1, 1, 0.15)
         self.context.fill_preserve()
         self.context.set_source_rgb(0, 0, 0)
         self.context.set_line_width(0.01)
@@ -119,9 +119,9 @@ class Canvas:
 
         self.context.rectangle(self.x_pos, self.y_pos, 1, 1)
         if self.rotating_orientation == 0:
-            self.context.set_source_rgb(1.0, 0.4, 0.4)
+            self.context.set_source_rgb(1.0, 0.15, 1.0)
         else:
-            self.context.set_source_rgb(1, 0, 0)
+            self.context.set_source_rgb(15, 0.15, 0.15)
         self.context.fill_preserve()
         self.context.set_source_rgb(0, 0, 0)
         self.context.set_line_width(0.01)
@@ -140,7 +140,7 @@ class Canvas:
     def draw_module(self, mod_id: int | str):
         """Draw a module (red) on the previous object"""
         self.context.rectangle(self.x_pos, self.y_pos, 1, 1)
-        self.context.set_source_rgb(0, 0, 1)
+        self.context.set_source_rgb(0.15, 0.15, 1)
         self.context.fill_preserve()
         self.context.set_source_rgb(0, 0, 0)
         self.context.set_line_width(0.01)

@@ -35,7 +35,7 @@ class TreeGenotype(IGenotype):
         tree: CoreNode = CoreNode((d, None) for d in CoreNode.valid_attatchments()),
     ) -> None:
         self._params = params
-        self._tree = tree
+        self._tree: CoreNode = tree
         self._prune_overlap()
 
     @classmethod
@@ -120,7 +120,7 @@ class TreeGenotype(IGenotype):
 
             return node.__class__(new_children)
 
-        self._tree = inner(self._tree, Directions.FRONT, (0, 0))
+        self._tree: CoreNode = inner(self._tree, Directions.FRONT, (0, 0))
         del self._occupied_slots
 
     def print_tree(self) -> None:
