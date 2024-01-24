@@ -15,7 +15,7 @@ def parse_arguments(args: List[str]) -> Dict:
     parser.add_argument(
         "json", help="The Json to load the input from", type=argparse.FileType("r")
     )
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(args)
 
     return json.load(arguments.json)
 

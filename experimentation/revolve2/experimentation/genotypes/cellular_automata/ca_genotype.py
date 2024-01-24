@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
 import random
 import math
 from queue import Queue
-from typing import Any, Dict, Tuple, Set, List, Self
+from typing import Any, Dict, Tuple, Set, List
 from dataclasses import dataclass
 
 from revolve2.modular_robot import (
@@ -93,8 +95,8 @@ class _CAGenotype:
         self.rule_set[new_key] = new_value
         del self.rule_set[existing_key]
 
-    def crossover(self, rng: np.random.Generator, *__o: Self) -> Self:
-        pass
+    def crossover(self, rng: np.random.Generator, *__o: _CAGenotype) -> _CAGenotype:
+        raise NotImplementedError
         # new_dict = rhs.rule_set.copy()
         # for _ in range(len(new_dict) // 2):
         #     new_dict.pop(random.randint(0, len(rhs.rule_set)))
@@ -321,22 +323,22 @@ class CAGenotype(IGenotype):
         )
         return self._ca_type.develop()
 
-    def copy(self) -> Self:
+    def copy(self) -> _CAGenotype:
         newitem = self.__class__(self.params)
         newitem._ca_type.rule_set = self._ca_type.rule_set.copy()
         return newitem
 
-    def mutate(self, rng: np.random.Generator) -> Self:
+    def mutate(self, rng: np.random.Generator) -> _CAGenotype:
         newitem = self.copy()
         newitem._ca_type.mutate(rng)
         return newitem
 
     @classmethod
-    def crossover(cls, _rhs: Self, _lhs: Self, /) -> Self:
+    def crossover(cls, _rhs: _CAGenotype, _lhs: _CAGenotype, /) -> _CAGenotype:
         raise NotImplementedError
 
     @classmethod
-    def random(cls, params: CAInitParameters, rng: np.random.Generator) -> Self:
+    def random(cls, params: CAInitParameters, rng: np.random.Generator) -> _CAGenotype:
         newitem = cls(params)
         newitem._ca_type.generate_random_genotype(params.nr_rules)
         return newitem

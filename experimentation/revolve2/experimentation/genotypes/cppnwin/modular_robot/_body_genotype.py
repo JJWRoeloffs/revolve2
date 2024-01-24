@@ -5,7 +5,6 @@ from dataclasses import dataclass
 import multineat
 import numpy as np
 from revolve2.modular_robot import Body
-from typing_extensions import Self
 
 from .._multineat_genotype_pickle_wrapper import MultineatGenotypePickleWrapper
 from .._multineat_rng_from_random import multineat_rng_from_random
@@ -126,8 +125,8 @@ class BodyGenotype:
     @classmethod
     def crossover_body(
         cls,
-        parent1: Self,
-        parent2: Self,
+        parent1: BodyGenotype,
+        parent2: BodyGenotype,
         rng: np.random.Generator,
     ) -> BodyGenotype:
         """

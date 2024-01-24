@@ -6,7 +6,6 @@ import sqlalchemy.orm as orm
 from revolve2.modular_robot import Body
 from sqlalchemy import event
 from sqlalchemy.engine import Connection
-from typing_extensions import Self
 
 from .._multineat_rng_from_random import multineat_rng_from_random
 from .._random_multineat_genotype import random_multineat_genotype
@@ -125,8 +124,8 @@ class BodyGenotypeOrm(orm.MappedAsDataclass, kw_only=True):
     @classmethod
     def crossover_body(
         cls,
-        parent1: Self,
-        parent2: Self,
+        parent1: BodyGenotypeOrm,
+        parent2: BodyGenotypeOrm,
         rng: np.random.Generator,
     ) -> BodyGenotypeOrm:
         """

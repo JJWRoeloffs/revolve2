@@ -1,7 +1,8 @@
-from dataclasses import dataclass
-from typing import Iterator, Optional, Self, Set, Tuple, List, TypeVar, cast
+from __future__ import annotations
 
-import numpy as np
+from dataclasses import dataclass
+from typing import Iterator, Set, Tuple, List, TypeVar, cast
+
 from numpy.random import Generator
 from revolve2.modular_robot import Body, Core, Directions
 
@@ -16,6 +17,8 @@ from revolve2.experimentation.genotypes.tree import (
 
 Nodes_gT = TypeVar("Nodes_gT", bound=Nodes_t)
 Nodes_g = TypeVar("Nodes_g", bound=Node)
+
+Location = Tuple[int, int]
 
 
 @dataclass
@@ -48,7 +51,7 @@ class TreeGenotype(IGenotype):
         )
 
     @classmethod
-    def random(cls, params: TreeInitParameters, rng: Generator) -> Self:
+    def random(cls, params: TreeInitParameters, rng: Generator) -> TreeGenotype:
         return cls(params, cls.random_subtree(CoreNode, params.max_depth, rng))
 
     def develop(self) -> Body:
@@ -57,10 +60,10 @@ class TreeGenotype(IGenotype):
         body.finalize()
         return body
 
-    def copy(self) -> Self:
+    def copy(self) -> TreeGenotype:
         return self.__class__(self._params, self._tree.copy())
 
-    def crossover(self, rng: Generator, __o: Self) -> Self:
+    def crossover(self, rng: Generator, __o: TreeGenotype) -> TreeGenotype:
         selftree, otree = self._tree.copy(), __o._tree.copy()
         tree = CoreNode(
             (d, selftree.get_child(d))
@@ -70,7 +73,7 @@ class TreeGenotype(IGenotype):
         )
         return self.__class__(self._params, tree)
 
-    def mutate(self, rng: Generator) -> Self:
+    def mutate(self, rng: Generator) -> TreeGenotype:
         ret = self.copy()
         node, depth = rng.choice(list(ret.nodes()))
         node.set_child(
@@ -90,7 +93,6 @@ class TreeGenotype(IGenotype):
         return inner(self._tree, 0)
 
     def _prune_overlap(self) -> None:
-        Location = Tuple[int, int]
         self._occupied_slots: Set[Location] = set()
 
         # Yes, this can be done with vector algebra,
@@ -99,13 +101,13 @@ class TreeGenotype(IGenotype):
             x, y = location
             match d:
                 case Directions.FRONT:
-                    return x + 1, y
-                case Directions.BACK:
-                    return x - 1, y
-                case Directions.RIGHT:
                     return x, y + 1
-                case Directions.LEFT:
+                case Directions.BACK:
                     return x, y - 1
+                case Directions.RIGHT:
+                    return x + 1, y
+                case Directions.LEFT:
+                    return x - 1, y
 
         def inner(node: Nodes_g, child_d: Directions, location: Location) -> Nodes_g:
             new_children: List[Tuple[Directions, Node]] = []

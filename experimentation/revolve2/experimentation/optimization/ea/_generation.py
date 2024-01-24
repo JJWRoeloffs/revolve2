@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, ClassVar, ForwardRef, Generic, Type, TypeVar
 
 import sqlalchemy
@@ -6,7 +8,6 @@ from revolve2.experimentation._util.init_subclass_get_generic_args import (
     init_subclass_get_generic_args,
 )
 from revolve2.experimentation.database import HasId
-from typing_extensions import Self
 
 TPopulation = TypeVar("TPopulation")
 
@@ -60,7 +61,7 @@ class Generation(HasId, orm.MappedAsDataclass, Generic[TPopulation]):
 
     __type_tpopulation: ClassVar[Type[TPopulation]]  # type: ignore[misc]
 
-    def __init_subclass__(cls: Type[Self], /, **kwargs: dict[str, Any]) -> None:
+    def __init_subclass__(cls, /, **kwargs: dict[str, Any]) -> None:
         """
         Initialize a version of this class when it is subclassed.
 

@@ -6,7 +6,6 @@ from revolve2.experimentation._util.init_subclass_get_generic_args import (
     init_subclass_get_generic_args,
 )
 from revolve2.experimentation.database import HasId
-from typing_extensions import Self
 
 TGenotype = TypeVar("TGenotype")
 
@@ -70,9 +69,7 @@ class Individual(HasId, orm.MappedAsDataclass, Generic[TGenotype]):
     __type_tgenotype: ClassVar[Type[TGenotype]]  # type: ignore[misc]
     __population_table: ClassVar[str]
 
-    def __init_subclass__(
-        cls: Type[Self], population_table: str, **kwargs: dict[str, Any]
-    ) -> None:
+    def __init_subclass__(cls, population_table: str, **kwargs: dict[str, Any]) -> None:
         """
         Initialize a version of this class when it is subclassed.
 

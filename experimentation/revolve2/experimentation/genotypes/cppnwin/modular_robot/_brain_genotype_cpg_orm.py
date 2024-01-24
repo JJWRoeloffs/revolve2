@@ -5,7 +5,6 @@ import numpy as np
 import sqlalchemy.orm as orm
 from sqlalchemy import event
 from sqlalchemy.engine import Connection
-from typing_extensions import Self
 
 from .._multineat_rng_from_random import multineat_rng_from_random
 from .._random_multineat_genotype import random_multineat_genotype
@@ -124,8 +123,8 @@ class BrainGenotypeCpgOrm(orm.MappedAsDataclass, kw_only=True):
     @classmethod
     def crossover_brain(
         cls,
-        parent1: Self,
-        parent2: Self,
+        parent1: BrainGenotypeCpgOrm,
+        parent2: BrainGenotypeCpgOrm,
         rng: np.random.Generator,
     ) -> BrainGenotypeCpgOrm:
         """

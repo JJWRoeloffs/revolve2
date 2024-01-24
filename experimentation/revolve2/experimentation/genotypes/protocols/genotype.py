@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Self
+from typing import Generic, List, TypeVar
 
 from typing_extensions import TYPE_CHECKING
 
@@ -16,9 +16,12 @@ class GenotypeInitParams(ABC):
         ...
 
 
-class IGenotype(ABC):
+InitParams = TypeVar("InitParams", bound=GenotypeInitParams)
+
+
+class IGenotype(Generic[InitParams], ABC):
     @abstractmethod
-    def __init__(self, params: GenotypeInitParams) -> None:
+    def __init__(self, params: InitParams) -> None:
         ...
 
     @abstractmethod
@@ -26,25 +29,25 @@ class IGenotype(ABC):
         """Develop the genotype into its phenotype"""
 
     @abstractmethod
-    def copy(self) -> Self:
+    def copy(self) -> IGenotype:
         """Get a deeply copied version of the object"""
 
     @abstractmethod
-    def mutate(self, rng: np.random.Generator) -> Self:
+    def mutate(self, rng: np.random.Generator) -> IGenotype:
         """Get a deeply copied version of the object, with some mutation applied"""
 
     @abstractmethod
-    def crossover(self, rng: np.random.Generator, *__o: Self) -> Self:
+    def crossover(self, rng: np.random.Generator, __o: IGenotype) -> IGenotype:
         """Perform crossover between two individuals. Return a new copy"""
 
     @classmethod
     @abstractmethod
-    def random(cls, params: GenotypeInitParams, rng: np.random.Generator) -> Self:
+    def random(cls, params: InitParams, rng: np.random.Generator) -> IGenotype:
         """Factory method returning a randomly generated individual"""
 
     @classmethod
     def random_individuals(
-        cls, params: GenotypeInitParams, n: int, rng: np.random.Generator
-    ) -> List[Self]:
+        cls, params: InitParams, n: int, rng: np.random.Generator
+    ) -> List[IGenotype]:
         """Factory method returning randomly generated individuals"""
         return [cls.random(params, rng) for _ in range(n)]

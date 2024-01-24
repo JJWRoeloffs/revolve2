@@ -1,5 +1,6 @@
-from typing import Dict
 from dataclasses import dataclass
+
+from typing import cast, Dict, Any
 
 import marshmallow_dataclass
 
@@ -13,5 +14,5 @@ class Arguments:
 PARASER = marshmallow_dataclass.class_schema(Arguments)()
 
 
-def parse_json(json: Dict) -> Arguments:
-    return PARASER.load(json)
+def parse_json(json: Dict[str, Any]) -> Arguments:
+    return cast(Arguments, PARASER.load(json))

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from typing import Iterable, Optional, List, Self, Tuple, Union
+from typing import Iterable, Optional, List, Tuple, Union
 
 from revolve2.modular_robot import (
     Directions,
@@ -46,7 +46,7 @@ class Node(ABC):
                 ret.set_child(child.to_module(), Directions(i))
         return ret
 
-    def copy(self) -> Self:
+    def copy(self) -> Node:
         return self.__class__((d, c.copy()) for d, c in self.children)
 
     @property

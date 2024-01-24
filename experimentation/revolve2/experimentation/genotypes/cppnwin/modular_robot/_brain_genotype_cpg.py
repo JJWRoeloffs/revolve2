@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 import multineat
 import numpy as np
-from typing_extensions import Self
 
 from .._multineat_genotype_pickle_wrapper import MultineatGenotypePickleWrapper
 from .._multineat_rng_from_random import multineat_rng_from_random
@@ -125,8 +124,8 @@ class BrainGenotypeCpg:
     @classmethod
     def crossover_brain(
         cls,
-        parent1: Self,
-        parent2: Self,
+        parent1: BrainGenotypeCpg,
+        parent2: BrainGenotypeCpg,
         rng: np.random.Generator,
     ) -> BrainGenotypeCpg:
         """
