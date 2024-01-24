@@ -5,6 +5,7 @@ import random
 import math
 from queue import Queue
 from typing import Any, Dict, Tuple, Set, List
+from typing_extensions import Self
 from dataclasses import dataclass
 
 from revolve2.modular_robot import (
@@ -304,7 +305,7 @@ class CAInitParameters(GenotypeInitParams):
     nr_rules: int
 
 
-class CAGenotype(IGenotype):
+class CAGenotype(IGenotype[CAInitParameters]):
     _ca_type: _CAGenotype
     params: CAInitParameters
     rule_set: Dict[Tuple[int, int, int, int], int]
@@ -323,22 +324,21 @@ class CAGenotype(IGenotype):
         )
         return self._ca_type.develop()
 
-    def copy(self) -> _CAGenotype:
+    def copy(self) -> CAGenotype:
         newitem = self.__class__(self.params)
         newitem._ca_type.rule_set = self._ca_type.rule_set.copy()
         return newitem
 
-    def mutate(self, rng: np.random.Generator) -> _CAGenotype:
+    def mutate(self, rng: np.random.Generator) -> CAGenotype:
         newitem = self.copy()
         newitem._ca_type.mutate(rng)
         return newitem
 
-    @classmethod
-    def crossover(cls, _rhs: _CAGenotype, _lhs: _CAGenotype, /) -> _CAGenotype:
+    def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
         raise NotImplementedError
 
     @classmethod
-    def random(cls, params: CAInitParameters, rng: np.random.Generator) -> _CAGenotype:
+    def random(cls, params: CAInitParameters, rng: np.random.Generator) -> CAGenotype:
         newitem = cls(params)
         newitem._ca_type.generate_random_genotype(params.nr_rules)
         return newitem

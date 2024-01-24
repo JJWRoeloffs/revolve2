@@ -48,6 +48,16 @@ class Node(ABC):
 
         return inner(self, 0)
 
+    def to_module(self) -> Module:
+        ret = self._association()(RightAngles.RAD_0)
+        for i, child in enumerate(self._children):
+            if child is not None:
+                ret.set_child(child.to_module(), Directions(i))
+        return ret
+
+    def copy(self) -> Self:
+        return self.__class__((d, c.copy()) for d, c in self.children)
+
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, self.__class__):
             return all(
@@ -57,17 +67,7 @@ class Node(ABC):
 
         return NotImplemented
 
-    def to_module(self) -> Module:
-        ret = self._association(RightAngles.RAD_0)
-        for i, child in enumerate(self._children):
-            if child is not None:
-                ret.set_child(child.to_module(), Directions(i))
-        return ret
-
-    def copy(self) -> Self:
-        return self.__class__((d, c.copy()) for d, c in self.children)
-
-    @property
+    @classmethod
     @abstractmethod
     def _association(cls) -> type[Modules_t]:
         ...
@@ -79,8 +79,8 @@ class Node(ABC):
 
 
 class CoreNode(Node):
-    @property
-    def _association(self) -> type[Core]:
+    @classmethod
+    def _association(cls) -> type[Core]:
         return Core
 
     @classmethod
@@ -89,8 +89,8 @@ class CoreNode(Node):
 
 
 class BrickNode(Node):
-    @property
-    def _association(self) -> type[Brick]:
+    @classmethod
+    def _association(cls) -> type[Brick]:
         return Brick
 
     @classmethod
@@ -99,8 +99,8 @@ class BrickNode(Node):
 
 
 class ActiveHingeNode(Node):
-    @property
-    def _association(self) -> type[ActiveHinge]:
+    @classmethod
+    def _association(cls) -> type[ActiveHinge]:
         return ActiveHinge
 
     @classmethod

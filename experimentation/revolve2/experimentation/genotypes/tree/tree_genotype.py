@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterator, Set, Tuple, List, TypeVar, cast
+from typing import Set, Tuple, List, TypeVar, cast
 
 from numpy.random import Generator
 from revolve2.modular_robot import Body, Core, Directions

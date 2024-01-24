@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Generic, List, TypeVar
 
-from typing_extensions import TYPE_CHECKING
+from typing_extensions import TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
     from revolve2.modular_robot import Body
@@ -37,17 +37,17 @@ class IGenotype(Generic[InitParams], ABC):
         """Get a deeply copied version of the object, with some mutation applied"""
 
     @abstractmethod
-    def crossover(self, rng: np.random.Generator, __o: IGenotype) -> IGenotype:
+    def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
         """Perform crossover between two individuals. Return a new copy"""
 
     @classmethod
     @abstractmethod
-    def random(cls, params: InitParams, rng: np.random.Generator) -> IGenotype:
+    def random(cls, params: InitParams, rng: np.random.Generator) -> Self:
         """Factory method returning a randomly generated individual"""
 
     @classmethod
     def random_individuals(
         cls, params: InitParams, n: int, rng: np.random.Generator
-    ) -> List[IGenotype]:
+    ) -> List[Self]:
         """Factory method returning randomly generated individuals"""
         return [cls.random(params, rng) for _ in range(n)]
