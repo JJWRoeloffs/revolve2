@@ -397,7 +397,6 @@ class Develop:
                     #   print(orientation, absolute_rotation)
                     new_module = module_type(orientation * (math.pi / 2.0))
                     self.quantity_modules += 1
-                    new_module._id = str(self.quantity_modules)
                     new_module._absolute_rotation = absolute_rotation
                     new_module.rgb = self.get_color(module_type, orientation)
                     new_module._parent = cell.developed_module
@@ -522,7 +521,6 @@ class Develop:
     def place_head(self, new_cell: Cell) -> Core:
         module_type = Core
         self.phenotype_body = Body()
-        self.phenotype_body.core._id = self.quantity_modules
         orientation = 0
         self.phenotype_body.core._rotation = orientation
         self.phenotype_body.core.rgb = self.get_color(module_type, orientation)

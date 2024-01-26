@@ -95,8 +95,8 @@ class Module:
         :param id: The id of the module.
         :raises RuntimeError: In case the id was already set before.
         """
-        # if self._id is not None:
-        #     raise RuntimeError("Cannot set id twice.")
+        if self._id is not None:
+            raise RuntimeError("Cannot set id twice.")
         self._id = id
 
     def neighbours(self, within_range: int) -> list[Module]:
