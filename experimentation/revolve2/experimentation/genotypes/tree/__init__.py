@@ -5,6 +5,7 @@ from .nodes import (
     CoreNode,
     BrickNode,
     ActiveHingeNode,
+    RotatedActiveHingeNode,
 )
 from .tree_genotype import TreeGenotype, TreeInitParameters
 
@@ -15,6 +16,7 @@ __all__ = (
     "CoreNode",
     "BrickNode",
     "ActiveHingeNode",
+    "RotatedActiveHingeNode",
     "TreeInitParameters",
     "TreeGenotype",
 )

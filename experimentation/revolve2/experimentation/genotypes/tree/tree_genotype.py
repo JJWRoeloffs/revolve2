@@ -13,6 +13,7 @@ from revolve2.experimentation.genotypes.tree import (
     CoreNode,
     BrickNode,
     ActiveHingeNode,
+    RotatedActiveHingeNode,
 )
 
 Nodes_gT = TypeVar("Nodes_gT", bound=Nodes_t)
@@ -27,7 +28,7 @@ class TreeInitParameters(GenotypeInitParams):
 
 
 class TreeGenotype(IGenotype[TreeInitParameters]):
-    VALID_CHILDREN = [BrickNode, ActiveHingeNode]
+    VALID_CHILDREN = [BrickNode, ActiveHingeNode, RotatedActiveHingeNode]
 
     def __init__(
         self,

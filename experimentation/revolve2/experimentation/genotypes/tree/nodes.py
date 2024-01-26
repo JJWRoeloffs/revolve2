@@ -48,11 +48,10 @@ class Node(ABC):
 
         return inner(self, 0)
 
-    def to_module(self) -> Module:
-        ret = self._association()(RightAngles.RAD_0)
-        for i, child in enumerate(self._children):
-            if child is not None:
-                ret.set_child(child.to_module(), Directions(i))
+    def to_module(self, angle: RightAngles = RightAngles.RAD_0) -> Module:
+        ret = self._association()(angle)
+        for d, child in self.children:
+            ret.set_child(child.to_module(), d)
         return ret
 
     def copy(self) -> Self:
@@ -60,10 +59,7 @@ class Node(ABC):
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, self.__class__):
-            return all(
-                ochild == vchild
-                for ochild, vchild in zip(self._children, __value._children)
-            )
+            return all(o == v for o, v in zip(self._children, __value._children))
 
         return NotImplemented
 
@@ -108,5 +104,21 @@ class ActiveHingeNode(Node):
         return [Directions.FRONT]
 
 
+class RotatedActiveHingeNode(Node):
+    @classmethod
+    def _association(cls) -> type[ActiveHinge]:
+        return ActiveHinge
+
+    @classmethod
+    def valid_attatchments(cls) -> List[Directions]:
+        return [Directions.FRONT]
+
+    def to_module(self, angle: RightAngles = RightAngles.RAD_0) -> Module:
+        ret = ActiveHinge(angle + RightAngles.RAD_HALFPI)
+        for d, child in self.children:
+            ret.set_child(child.to_module(RightAngles.RAD_ONEANDAHALFPI), d)
+        return ret
+
+
 Modules_t = Union[Core, Brick, ActiveHinge]
-Nodes_t = Union[CoreNode, BrickNode, ActiveHingeNode]
+Nodes_t = Union[CoreNode, BrickNode, ActiveHingeNode, RotatedActiveHingeNode]
