@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import multineat
+from typing import List
 
 
 @dataclass
 class Genotype:
-    genotype: multineat.Genome
+    genotype: List[float]

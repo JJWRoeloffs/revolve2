@@ -1,10 +1,12 @@
+import numpy as np
+
 from .genotype import Genotype
 
 
 def crossover_v1(
-    parent1,
-    parent2,
-    rng,
+    parent1: Genotype,
+    parent2: Genotype,
+    rng: np.random.Generator,
 ) -> Genotype:
     # TODO: this threshold and types  should match with the develop method automatically
     promoter_threshold = 0.8
@@ -26,7 +28,7 @@ def crossover_v1(
                     nucleotide_idx += types_nucleotypes
             nucleotide_idx += 1
 
-        cutpoint = rng.sample(promotor_sites, 1)[0]
+        cutpoint = rng.choice(promotor_sites, 1)[0]
         subset = parent[0 : cutpoint + types_nucleotypes + 1]
         new_genotype += subset
 

@@ -1,37 +1,9 @@
-import multineat
+import numpy as np
 
 from .genotype import Genotype
 
 
-def random_v1(
-    innov_db: multineat.InnovationDatabase,
-    rng: multineat.RNG,
-    multineat_params: multineat.Parameters,
-    output_activation_func: multineat.ActivationFunction,
-    num_inputs: int,
-    num_outputs: int,
-    num_initial_mutations: int,
-) -> Genotype:
-    genotype = multineat.Genome(
-        0,  # ID
-        num_inputs,
-        0,  # n_hidden
-        num_outputs,
-        False,  # FS_NEAT
-        output_activation_func,  # output activation type
-        multineat.ActivationFunction.TANH,  # hidden activation type
-        0,  # seed_type
-        multineat_params,
-        0,  # number of hidden layers
-    )
-
-    for _ in range(num_initial_mutations):
-        genotype = genotype.MutateWithConstraints(
-            False,
-            multineat.SearchMode.BLENDED,
-            innov_db,
-            multineat_params,
-            rng,
-        )
-
+def random_v1(rng: np.random.Generator) -> Genotype:
+    genome_size = 150 + 1
+    genotype = [round(rng.uniform(0, 1), 2) for _ in range(genome_size)]
     return Genotype(genotype)

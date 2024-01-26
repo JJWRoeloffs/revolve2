@@ -1,8 +1,9 @@
 import math
 import random
+from typing import List, Optional, Tuple, Union
 import numpy as np
 
-from revolve2.modular_robot import ActiveHinge, Body, Brick, Core
+from revolve2.modular_robot import ActiveHinge, Body, Brick, Core, Directions, Module
 from .genotype import Genotype
 
 
@@ -12,13 +13,19 @@ def random_v1(rng) -> Genotype:
     return Genotype(genotype)
 
 
+class Cell:
+    def __init__(self) -> None:
+        self.developed_module: Optional[Module] = None
+        self.transcription_factors = {}
+
+
 class Develop:
     # develops a Gene Regulatory network
     def __init__(
         self,
-        max_modules,
-        genotype,
-        querying_seed,
+        max_modules: int,
+        genotype: Genotype,
+        querying_seed: int,
     ):
         self.max_modules = max_modules
         self.genotype = genotype.genotype
@@ -29,8 +36,6 @@ class Develop:
         self.phenotype_body = None
         self.promotors = []
         self.quantity_modules = 0
-
-        print(dir(self.genotype))
 
         self.regulatory_transcription_factor_idx = 0
         self.regulatory_min_idx = 1
@@ -61,9 +66,12 @@ class Develop:
 
         return self.phenotype_body
 
-    def develop_body(self):
+    def develop_body(self) -> Body:
         self.gene_parser()
         self.regulate()
+
+        if self.phenotype_body is None:
+            raise ValueError("Cannot return non-developed body")
 
         return self.phenotype_body
 
@@ -100,6 +108,9 @@ class Develop:
                         round(limit / 100, 2)
                         for limit in range(0, 1 * 100, int(range_size * 100))
                     ]
+                    regulatory_transcription_factor_label = None
+                    transcription_factor_label = None
+
                     for idx in range(0, len(limits) - 1):
                         if (
                             regulatory_transcription_factor >= limits[idx]
@@ -116,6 +127,12 @@ class Develop:
                             transcription_factor_label = "TF" + str(idx + 1)
                         elif transcription_factor >= limits[idx + 1]:
                             transcription_factor_label = "TF" + str(len(limits))
+
+                    # if regulatory_transcription_factor_label is None:
+                    #     raise ValueError("cannot parse gene without length")
+                    # if transcription_factor_label is None:
+                    #     raise ValueError("cannot parse gene without length")
+
                     # ends: converts tfs values into labels #
 
                     # begin: converts diffusion sites values into labels #
@@ -124,12 +141,14 @@ class Develop:
                         round(limit / 100, 2)
                         for limit in range(0, 1 * 100, int(range_size * 100))
                     ]
+                    diffusion_site_label = None
                     for idx in range(0, len(limits) - 1):
                         if limits[idx + 1] > diffusion_site >= limits[idx]:
                             diffusion_site_label = idx
                         elif diffusion_site >= limits[idx + 1]:
                             diffusion_site_label = len(limits) - 1
-                    # ends: converts diffusion sites values into labels #
+                    # if diffusion_site_label is None:
+                    #     raise ValueError("cannot parse gene without length")
 
                     gene = [
                         regulatory_transcription_factor_label,
@@ -173,7 +192,7 @@ class Develop:
                 for tf in cell.transcription_factors:
                     self.decay(tf, cell)
 
-    def increase(self, tf, cell):
+    def increase(self, tf: int, cell: Cell):
         # increase concentration in due diffusion sites
         tf_promotors = np.where(self.promotors[:, self.transcription_factor_idx] == tf)[
             0
@@ -187,7 +206,7 @@ class Develop:
                 self.increase_scaling
             )
 
-    def inter_diffusion(self, tf, cell):
+    def inter_diffusion(self, tf: int, cell: Cell):
         for ds in range(0, self.diffusion_sites_qt):
             # back slot of all modules but core send to a parent
             if ds == Core.BACK and (
@@ -267,7 +286,7 @@ class Develop:
                             tf
                         ][Core.BACK] += self.inter_diffusion_rate
 
-    def intra_diffusion(self, tf, cell):
+    def intra_diffusion(self, tf: int, cell: Cell):
         # for each site: first right then left
         for ds in range(0, self.diffusion_sites_qt):
             # print(' ds', ds)
@@ -282,14 +301,14 @@ class Develop:
                 cell.transcription_factors[tf][ds] -= self.intra_diffusion_rate
                 cell.transcription_factors[tf][ds_left] += self.intra_diffusion_rate
 
-    def decay(self, tf, cell):
+    def decay(self, tf: int, cell: Cell):
         # decay in all sites
         for ds in range(0, self.diffusion_sites_qt):
             cell.transcription_factors[tf][ds] = max(
                 0, cell.transcription_factors[tf][ds] - self.concentration_decay
             )
 
-    def place_module(self, cell):
+    def place_module(self, cell: Cell):
         tds_qt = self.structural_trs + self.regulatory_tfs
         product_tfs = []
         modules_types = [Brick, ActiveHinge]
@@ -394,7 +413,7 @@ class Develop:
             # else:
             #     print('no slots!')
 
-    def new_cell(self, source_cell, new_module, slot):
+    def new_cell(self, source_cell: Cell, new_module: Module, slot: int):
         #  print('new')
         new_cell = Cell()
 
@@ -452,7 +471,7 @@ class Develop:
         self.cells.append(first_cell)
         first_cell.developed_module = self.place_head(first_cell)
 
-    def express_promoters(self, new_cell):
+    def express_promoters(self, new_cell: Cell):
         for promotor in self.promotors:
             regulatory_min_val = min(
                 float(promotor[self.regulatory_min_idx]),
@@ -500,10 +519,7 @@ class Develop:
                         promotor[self.transcription_factor_amount_idx]
                     )
 
-        # for t in new_cell.transcription_factors:
-        #     print(t, new_cell.transcription_factors[t])
-
-    def place_head(self, new_cell):
+    def place_head(self, new_cell: Cell) -> Core:
         module_type = Core
         self.phenotype_body = Body()
         self.phenotype_body.core._id = self.quantity_modules
@@ -517,20 +533,26 @@ class Develop:
 
         return self.phenotype_body.core
 
-    def get_color(self, module_type, rotation):
-        rgb = []
+    def get_color(
+        self,
+        module_type: Union[type[Brick], type[ActiveHinge], type[Core]],
+        rotation: int,
+    ) -> List[float]:
         if module_type == Brick:
-            rgb = [0, 0, 1]
-        if module_type == ActiveHinge:
+            return [0, 0, 1]
+        elif module_type == ActiveHinge:
             if rotation == 0:
-                rgb = [1, 0.08, 0.58]
+                return [1, 0.08, 0.58]
             else:
-                rgb = [0.7, 0, 0]
-        if module_type == Core:
-            rgb = [1, 1, 0]
-        return rgb
+                return [0.7, 0, 0]
+        elif module_type == Core:
+            return [1, 1, 0]
+        else:
+            raise ValueError(f"{module_type} is not a valid Module type")
 
-    def calculate_coordinates(self, parent, slot):
+    def calculate_coordinates(
+        self, parent: Module, slot: Directions
+    ) -> Tuple[Tuple[int, int], int]:
         # calculate the actual 2d direction and coordinates of new module using relative-to-parent position as reference
         dic = {Core.FRONT: 0, Core.LEFT: 1, Core.BACK: 2, Core.RIGHT: 3}
 
@@ -565,9 +587,3 @@ class Develop:
             raise ValueError("Unreachable")
 
         return coordinates, turtle_direction
-
-
-class Cell:
-    def __init__(self) -> None:
-        self.developed_module = None
-        self.transcription_factors = {}

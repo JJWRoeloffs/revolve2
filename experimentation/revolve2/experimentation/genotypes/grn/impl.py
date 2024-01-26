@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import multineat
 from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
 
-from typing_extensions import TYPE_CHECKING, Self
+from typing_extensions import Self
 
 from .develop import Develop
 from .genotype import Genotype
@@ -49,33 +49,11 @@ class GRNGenotype(IGenotype):
     @classmethod
     def random(cls, params: GRNInitParams, rng: np.random.Generator) -> Self:
         """Factory method returning a randomly generated individual"""
-        innov_db = multineat.InnovationDatabase()
-        num_initial_mutations = 10
-        genotype = random_v1(
-            innov_db,
-            cls._multineat_rng_from_random(rng),
-            _MULTINEAT_PARAMS,
-            multineat.ActivationFunction.TANH,  # hidden activation type
-            7,  # bias(always 1), x1, y1, z1, x2, y2, z2
-            1,  # weight
-            num_initial_mutations,
-        )
+        genotype = random_v1(rng)
         return cls._from_genotype(genotype, params, rng)
 
     @classmethod
     def _from_genotype(
         cls, genotype: Genotype, params: GRNInitParams, rng: np.random.Generator
     ):
-        return cls(params, genotype, int(100 * rng.random()))
-
-    @staticmethod
-    def _multineat_rng_from_random(rng: np.random.Generator) -> multineat.RNG:
-        """
-        Create a multineat rng object from a numpy rng state.
-
-        :param rng: The numpy rng.
-        :returns: The multineat rng.
-        """
-        multineat_rng = multineat.RNG()
-        multineat_rng.Seed(rng.integers(0, 2**31))
-        return multineat_rng
+        return cls(params, genotype, rng.integers(0, 2**31))
