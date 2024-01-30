@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Optional
 
 from revolve2.simulation.actor import Color
@@ -20,7 +21,12 @@ class Module:
 
     _color: Color
 
-    def __init__(self, nr_children: int, rotation: float, color: Color):
+    def __init__(
+        self,
+        nr_children: int,
+        rotation: float = 0.0,
+        color: Color = Color(255, 255, 255, 255),
+    ):
         """
         Initialize this object.
 

@@ -128,3 +128,12 @@ class Directions(IntEnum):
                 return RightAngles.RAD_HALFPI
             case self.BACK:
                 return RightAngles.RAD_PI
+
+    def mirrored(self) -> Directions:
+        match self:
+            case self.LEFT:
+                return Directions.RIGHT
+            case self.RIGHT:
+                return Directions.LEFT
+            case o:
+                return o
