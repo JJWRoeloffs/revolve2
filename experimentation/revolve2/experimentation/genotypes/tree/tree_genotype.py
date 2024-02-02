@@ -16,6 +16,7 @@ from revolve2.experimentation.genotypes.protocols import (
     without_overlap,
     GenotypeInitParams,
     IGenotype,
+    SymmetricalGenotype,
 )
 
 Node_T = TypeVar("Node_T", bound=Node)
@@ -53,6 +54,9 @@ class TreeGenotype(IGenotype[TreeInitParameters]):
     def random(cls, params: TreeInitParameters, rng: Generator) -> Self:
         return cls(params, cls._random_subtree(CoreNode, params.max_depth, rng))
 
+    def as_symmetrical(self) -> SymmetricalTreeGenotype:
+        return SymmetricalTreeGenotype(self)
+
     def develop(self) -> Body:
         body = Body()
         body.core = cast(Core, self._tree.to_module())
@@ -82,3 +86,9 @@ class TreeGenotype(IGenotype[TreeInitParameters]):
             rng.choice(node.valid_attatchments()),
         )
         return self.__class__(self._params, newtree)
+
+
+class SymmetricalTreeGenotype(SymmetricalGenotype):
+    @classmethod
+    def wrapped(cls) -> type[TreeGenotype]:
+        return TreeGenotype

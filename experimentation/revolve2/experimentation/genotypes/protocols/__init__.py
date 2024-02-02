@@ -7,6 +7,7 @@ from .nodes import (
     RotatedActiveHingeNode,
     without_overlap,
 )
+from .symmetrical import SymmetricalGenotype
 
 
 __all__ = (
@@ -18,4 +19,5 @@ __all__ = (
     "GenotypeInitParams",
     "IGenotype",
     "without_overlap",
+    "SymmetricalGenotype",
 )

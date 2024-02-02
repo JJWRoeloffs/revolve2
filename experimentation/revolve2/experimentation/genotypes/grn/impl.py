@@ -5,6 +5,8 @@ from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGe
 
 from typing_extensions import Self
 
+from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
+
 from .develop import Develop
 from .genotype import Genotype
 from .mutate import mutate_body
@@ -59,3 +61,9 @@ class GRNGenotype(IGenotype[GRNInitParams]):
         cls, genotype: Genotype, params: GRNInitParams, rng: np.random.Generator
     ):
         return cls(params, genotype, rng.integers(0, 2**31))
+
+
+class SymmetricalGRNGenotype(SymmetricalGenotype):
+    @classmethod
+    def wrapped(cls) -> type[GRNGenotype]:
+        return GRNGenotype

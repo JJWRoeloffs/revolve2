@@ -81,6 +81,28 @@ class Node(ABC):
                 )
         return ret
 
+    @classmethod
+    def from_module(cls, module: Optional[Module]) -> Optional[Self]:
+        if module is None:
+            return None
+        match module:
+            case m if isinstance(m, Core):
+                node_type = CoreNode
+            case m if isinstance(m, Brick):
+                node_type = BrickNode
+            case m if isinstance(m, ActiveHinge) and m._rotation == 0.0:
+                node_type = ActiveHingeNode
+            case m if isinstance(m, ActiveHinge):
+                node_type = RotatedActiveHingeNode
+            case _:
+                raise NotImplementedError
+        return node_type(
+            [
+                (Directions(d), cls.from_module(child))
+                for d, child in enumerate(module._children)
+            ]
+        )
+
     def copy(self) -> Self:
         return self.__class__((d, c.copy()) for d, c in self.children)
 
@@ -166,6 +188,7 @@ class RotatedActiveHingeNode(Node):
 
 
 Location = Tuple[int, int]
+NODES = [CoreNode, BrickNode, ActiveHingeNode, RotatedActiveHingeNode]
 
 
 def without_overlap(
