@@ -68,7 +68,7 @@ class Node(ABC):
         for d, child in self.children:
             if d == Directions.RIGHT or d == Directions.LEFT:
                 ret.set_child(
-                    child.to_module_flipped(RightAngles.RAD_0 - self.base_angle()),
+                    child.to_module(RightAngles.RAD_0 - self.base_angle()),
                     Directions.RIGHT,
                 )
                 ret.set_child(
@@ -217,9 +217,9 @@ def without_overlap(
         for child_d, child in node.children:
             new_dir = Directions.from_angle(par_d.to_angle() + child_d.to_angle())
             child_loc = add_angle(location, new_dir)
-            if not (min_x < child_loc[0] < max_x):
+            if not (min_x <= child_loc[0] <= max_x):
                 continue
-            if not (min_y < child_loc[1] < max_y):
+            if not (min_y <= child_loc[1] <= max_y):
                 continue
             if child_loc in _occupied_slots:
                 continue
