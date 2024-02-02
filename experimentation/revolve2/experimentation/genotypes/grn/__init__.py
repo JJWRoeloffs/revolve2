@@ -1,3 +1,3 @@
-from .impl import GRNGenotype, GRNInitParams
+from .impl import GRNGenotype, GRNInitParams, SymmetricalGRNGenotype
 
-__all__ = ("GRNInitParams", "GRNGenotype")
+__all__ = ("GRNInitParams", "GRNGenotype", "SymmetricalGRNGenotype")

@@ -53,18 +53,18 @@ def run_generation(previous_population: List[TreeGenotype], itteration: int, rng
     current_population = []
 
     for itter, individual in enumerate(previous_population):
-        g = individual.mutate(rng)
+        g = individual.mutate(rng).as_symmetrical()
         body = g.develop()
 
         # We choose a 'CPG' brain with random parameters (the exact working will not be explained here).
         brain = BrainCpgNetworkNeighborRandom(rng)
         # Combine the body and brain into a modular robot.
         robot = ModularRobot(body, brain)
-        # render_robot(robot, Path() / f"{itteration}_{itter}_robot.png")
+        render_robot(robot, Path() / f"{itteration}_{itter}_robot.png")
 
         batch = create_batch_single_robot_standard(robot=robot, terrain=terrains.flat())
 
-        runner = LocalRunner(headless=True)
+        runner = LocalRunner(headless=False)
 
         results = asyncio.run(runner.run_batch(batch))
         environment_results = results.environment_results[0]
@@ -131,9 +131,10 @@ def run_experiment(num_generations: int, num_individuals: int) -> None:
 
     fitness_data = []
     population = initialize(num_individuals, rng)
+    population = [individual.as_symmetrical() for individual in population]
 
     for i, individual in enumerate(population):
-        g = individual.mutate(rng)
+        g = individual.mutate(rng).as_symmetrical()
         body = g.develop()
         brain = BrainCpgNetworkNeighborRandom(rng)
         robot = ModularRobot(body, brain)

@@ -3,7 +3,7 @@ import json
 
 from typing import Dict, List
 
-from adv_symmetry.ca_run import run_experiment
+from adv_symmetry.tree_run import run_experiment
 from adv_symmetry.argument_schema import parse_json, Arguments
 
 

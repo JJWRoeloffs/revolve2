@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import multineat
 from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
 
 from typing_extensions import Self
+
+from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
 
 from .develop import Develop
 from .genotype import Genotype
 from .mutate import mutate_body
 from .crossover import crossover_v1
 from .random import random_v1
-from .multineat_parameters import _MULTINEAT_PARAMS
 
 from revolve2.modular_robot import Body
 import numpy as np
@@ -22,7 +22,7 @@ class GRNInitParams(GenotypeInitParams):
     max_modules: int
 
 
-class GRNGenotype(IGenotype):
+class GRNGenotype(IGenotype[GRNInitParams]):
     def __init__(self, params: GRNInitParams, gen: Genotype, seed: int) -> None:
         self.developer = Develop(
             max_modules=params.max_modules, genotype=gen, querying_seed=seed
@@ -30,14 +30,18 @@ class GRNGenotype(IGenotype):
         self.genotype = gen
         self.params = params
 
+    def as_symmetrical(self) -> Self:
+        """Get a version that will develop into a symetrical body"""
+        raise NotImplementedError
+
     def develop(self) -> Body:
         return self.developer.develop()
 
-    def copy(self) -> GRNGenotype:
+    def copy(self) -> Self:
         """Get a deeply copied version of the object"""
         raise NotImplementedError
 
-    def mutate(self, rng: np.random.Generator) -> GRNGenotype:
+    def mutate(self, rng: np.random.Generator) -> Self:
         """Get a deeply copied version of the object, with some mutation applied"""
         genotype = mutate_body(self.genotype, rng)
         return self._from_genotype(genotype, self.params, rng)
@@ -57,3 +61,9 @@ class GRNGenotype(IGenotype):
         cls, genotype: Genotype, params: GRNInitParams, rng: np.random.Generator
     ):
         return cls(params, genotype, rng.integers(0, 2**31))
+
+
+class SymmetricalGRNGenotype(SymmetricalGenotype):
+    @classmethod
+    def wrapped(cls) -> type[GRNGenotype]:
+        return GRNGenotype

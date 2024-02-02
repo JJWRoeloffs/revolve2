@@ -25,15 +25,19 @@ class IGenotype(Generic[InitParams], ABC):
         ...
 
     @abstractmethod
+    def as_symmetrical(self) -> Self:
+        """Get a version that will develop into a symetrical body"""
+
+    @abstractmethod
     def develop(self) -> Body:
         """Develop the genotype into its phenotype"""
 
     @abstractmethod
-    def copy(self) -> IGenotype:
+    def copy(self) -> Self:
         """Get a deeply copied version of the object"""
 
     @abstractmethod
-    def mutate(self, rng: np.random.Generator) -> IGenotype:
+    def mutate(self, rng: np.random.Generator) -> Self:
         """Get a deeply copied version of the object, with some mutation applied"""
 
     @abstractmethod

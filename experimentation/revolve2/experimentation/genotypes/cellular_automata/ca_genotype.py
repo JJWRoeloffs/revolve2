@@ -18,6 +18,7 @@ from revolve2.modular_robot import (
 )
 from revolve2.modular_robot import Directions
 from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
+from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
 
 
 @dataclass
@@ -342,3 +343,9 @@ class CAGenotype(IGenotype[CAInitParameters]):
         newitem = cls(params)
         newitem._ca_type.generate_random_genotype(params.nr_rules)
         return newitem
+
+
+class SymmetricalCAGenotype(SymmetricalGenotype):
+    @classmethod
+    def wrapped(cls) -> type[CAGenotype]:
+        return CAGenotype
