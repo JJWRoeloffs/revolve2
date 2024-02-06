@@ -17,3 +17,11 @@ def xy_displacement(begin_state: BodyState, end_state: BodyState) -> float:
         (begin_state.core_position[0] - end_state.core_position[0]) ** 2
         + ((begin_state.core_position[1] - end_state.core_position[1]) ** 2)
     )
+
+
+def x_displacement(begin_state: BodyState, end_state: BodyState) -> float:
+    return abs(begin_state.core_position[0] - end_state.core_position[0])
+
+
+def y_displacement(begin_state: BodyState, end_state: BodyState) -> float:
+    return abs(begin_state.core_position[1] - end_state.core_position[1])
