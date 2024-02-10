@@ -59,7 +59,7 @@ def slope(
     height = size[0] * math.tan(angle * (math.pi / 180.0)) #calculate height of the slope given base line of triangle and angle
 
     if height <= 0 :
-        max_height =  1
+        max_height =  1.0
     else:
         max_height = height
 

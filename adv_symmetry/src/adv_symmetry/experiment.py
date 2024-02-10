@@ -13,6 +13,7 @@ from revolve2.modular_robot import (
     get_body_states_single_robot,
 
 )
+from revolve2.experimentation.genotypes.protocols import IGenotype
 from revolve2.modular_robot.representations import render_robot
 from revolve2.experimentation.genotypes.cellular_automata import (
     CAGenotype,
@@ -23,7 +24,7 @@ from revolve2.ci_group import terrains, fitness_functions
 from revolve2.simulators.mujoco import LocalRunner
 
 # UNDER CONSTRUCTION
-def initialize(num_individuals: int, rng) -> List[CAGenotype]:
+def initialize(num_individuals: int, rng) -> List[IGenotype]:
     # If you run with a set seed, use the following lines instead.
     # SEED = 1234
     # rng = revolve2.ci_group.rng.make_rng(SEED)
@@ -31,7 +32,7 @@ def initialize(num_individuals: int, rng) -> List[CAGenotype]:
     params = CAInitParameters(domain_size=10, iterations=6, nr_rules=10)
     return CAGenotype.random_individuals(params, num_individuals, rng)
 
-def run_generation(previous_population: List[CAGenotype], itteration: int, rng):
+def run_generation(previous_population: List[IGenotype], itteration: int, rng):
     """
     Run all runs of an experiment using the provided parameters.
 
@@ -52,7 +53,7 @@ def run_generation(previous_population: List[CAGenotype], itteration: int, rng):
         #ADD TERRAINS HERE terrains.slope, terrains.flat
         batch = create_batch_single_robot_standard(robot=robot, terrain=terrains.slope())
 
-        runner = LocalRunner(headless=False)
+        runner = LocalRunner(headless=False, make_it_rain=True)
 
         results = asyncio.run(runner.run_batch(batch))
         environment_results = results.environment_results[0]
@@ -95,7 +96,7 @@ def survivor_selection(generation_fitness, population, percent_survivors):
 
     return top_individuals
 
-def save_population_to_file(population: List[CAGenotype], file_path: Path):
+def save_population_to_file(population: List[IGenotype], file_path: Path):
     population_data = [
         {str(k): v for k, v in individual._ca_type.rule_set.items()}
         for individual in population
@@ -156,3 +157,4 @@ def run_experiment(num_generations: int, num_individuals: int) -> None:
     # file_path = Path() / "last_population.json"
     # save_population_to_file(population, file_path)
 
+run_experiment(10,10)
