@@ -138,7 +138,7 @@ class CoreNode(Node):
 
     @classmethod
     def valid_attatchments(cls) -> List[Directions]:
-        return [Directions.FRONT, Directions.LEFT, Directions.RIGHT, Directions.LEFT]
+        return [Directions.FRONT, Directions.LEFT, Directions.RIGHT, Directions.BACK]
 
     @classmethod
     def base_angle(cls) -> RightAngles:
