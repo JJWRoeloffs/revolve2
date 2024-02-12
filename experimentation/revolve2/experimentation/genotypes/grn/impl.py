@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
 
@@ -29,17 +30,18 @@ class GRNGenotype(IGenotype[GRNInitParams]):
         )
         self.genotype = gen
         self.params = params
+        self.seed = seed
 
-    def as_symmetrical(self) -> Self:
+    def as_symmetrical(self) -> SymmetricalGRNGenotype:
         """Get a version that will develop into a symetrical body"""
-        raise NotImplementedError
+        return SymmetricalGRNGenotype(self)
 
     def develop(self) -> Body:
         return self.developer.develop()
 
     def copy(self) -> Self:
         """Get a deeply copied version of the object"""
-        raise NotImplementedError
+        return self.__class__(self.params, copy.deepcopy(self.genotype), self.seed)
 
     def mutate(self, rng: np.random.Generator) -> Self:
         """Get a deeply copied version of the object, with some mutation applied"""

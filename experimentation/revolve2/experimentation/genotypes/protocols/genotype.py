@@ -25,7 +25,7 @@ class IGenotype(Generic[InitParams], ABC):
         ...
 
     @abstractmethod
-    def as_symmetrical(self) -> Self:
+    def as_symmetrical(self) -> IGenotype:
         """Get a version that will develop into a symetrical body"""
 
     @abstractmethod
