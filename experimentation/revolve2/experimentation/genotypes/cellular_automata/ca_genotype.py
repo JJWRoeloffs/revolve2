@@ -318,6 +318,9 @@ class CAGenotype(IGenotype[CAInitParameters]):
         )
         self.params = params
 
+    def as_symmetrical(self) -> SymmetricalCAGenotype:
+        return SymmetricalCAGenotype(self)
+
     def develop(self) -> Body:
         self._ca_type.generate_body()
         self._ca_type.set_core(
