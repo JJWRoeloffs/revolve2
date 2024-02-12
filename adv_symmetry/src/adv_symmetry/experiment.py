@@ -1,3 +1,9 @@
+"""
+GRN representation testing, generates robot with simple survivor selection (top k% of fittest) with
+fixed starting gene length (dict of CA rules) and mutation that replaces one random chosen rule with a randomly
+generated rule
+"""
+
 import logging
 from typing import List, Tuple
 from pathlib import Path
@@ -11,7 +17,7 @@ from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
 from revolve2.modular_robot import (
     ModularRobot,
     get_body_states_single_robot,
-
+    MorphologicalMeasures,
 )
 from revolve2.experimentation.genotypes.protocols import IGenotype
 from revolve2.modular_robot.representations import render_robot
@@ -32,7 +38,7 @@ def initialize(num_individuals: int, rng) -> List[IGenotype]:
     params = CAInitParameters(domain_size=10, iterations=6, nr_rules=10)
     return CAGenotype.random_individuals(params, num_individuals, rng)
 
-def run_generation(previous_population: List[IGenotype], itteration: int, rng):
+def run_generation(previous_population: List[IGenotype], itteration: int, rng, symmetrical : bool = False, weightless : bool = False, terrain : terrains = terrains.flat()):
     """
     Run all runs of an experiment using the provided parameters.
 
@@ -42,8 +48,15 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng):
     current_population = []
 
     for itter, individual in enumerate(previous_population):
-        g = individual.mutate(rng).as_symmetrical()
+        if symmetrical:
+            g = individual.mutate(rng).as_symmetrical()
+        else:
+            g = individual.mutate(rng)
+
+
         body = g.develop()
+
+        body_measures = MorphologicalMeasures(body=body)
 
         # We choose a 'CPG' brain with random parameters (the exact working will not be explained here).
         brain = BrainCpgNetworkNeighborRandom(rng)
@@ -51,9 +64,9 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng):
         robot = ModularRobot(body, brain)
         render_robot(robot, Path() / f"{itteration}_{itter}_robot.png")
         #ADD TERRAINS HERE terrains.slope, terrains.flat
-        batch = create_batch_single_robot_standard(robot=robot, terrain=terrains.slope())
+        batch = create_batch_single_robot_standard(robot=robot, terrain=terrain)
 
-        runner = LocalRunner(headless=False, make_it_rain=True)
+        runner = LocalRunner(headless=False, make_it_rain=weightless)
 
         results = asyncio.run(runner.run_batch(batch))
         environment_results = results.environment_results[0]
@@ -70,6 +83,9 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng):
         )
 
         generation_fitness.append(xy_displacement)
+
+        #logging xy symmetry
+        logging.info(f"xy_symmetry = {body_measures.xy_symmetry}")
         logging.info(f"xy_displacement = {xy_displacement}")
 
         current_population.append(g)
