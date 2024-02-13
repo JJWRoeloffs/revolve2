@@ -106,6 +106,9 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng, s
 
         #logging xy symmetry
         logging.info(f"xy_symmetry = {body_measures.xy_symmetry}")
+        logging.info(f"xz_symmetry = {body_measures.xz_symmetry}")
+        logging.info(f"yz_symmetry = {body_measures.yz_symmetry}")
+
         logging.info(f"xy_displacement = {xy_displacement}")
 
         current_population.append(g)
@@ -141,7 +144,12 @@ def save_population_to_file(population: List[IGenotype], file_path: Path):
         json.dump(population_data, f)
 
 
-def run_experiment(num_generations: int, num_individuals: int, genotype: int = None, symmetrical : bool = False, weightless : bool = False, terrain : terrains = terrains.flat()) -> None:
+def run_experiment(num_generations: int, 
+                   num_individuals: int, 
+                   genotype: int = None, 
+                   symmetrical : bool = True, 
+                   weightless : bool = False, 
+                   terrain : terrains = terrains.flat()) -> None:
     """Run the simulation."""
     # Set up standard logging.
     # This decides the level of severity of logged messages we want to display.
@@ -167,7 +175,7 @@ def run_experiment(num_generations: int, num_individuals: int, genotype: int = N
 
     for i, individual in enumerate(population):
         if symmetrical:
-            g = individual.mutate(rng).as_symmetrical
+            g = individual.mutate(rng).as_symmetrical()
         else:
             g = individual.mutate(rng)
         body = g.develop()
@@ -194,8 +202,8 @@ def run_experiment(num_generations: int, num_individuals: int, genotype: int = N
     plt.savefig(Path() / f"fitness_dynamics_CA_g{num_generations}_p{num_individuals}")
 
     for i, individual in enumerate(population):
-        g = individual.mutate(rng)
-        body = g.develop()
+  #      g = individual.mutate(rng)
+        body = individual.develop()
         brain = BrainCpgNetworkNeighborRandom(rng)
         robot = ModularRobot(body, brain)
 
