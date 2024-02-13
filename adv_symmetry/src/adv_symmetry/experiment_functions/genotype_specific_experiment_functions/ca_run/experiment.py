@@ -173,3 +173,5 @@ def run_experiment(num_generations: int, num_individuals: int) -> None:
             pass
     # file_path = Path() / "last_population.json"
     # save_population_to_file(population, file_path)
+
+run_experiment(10,10)
