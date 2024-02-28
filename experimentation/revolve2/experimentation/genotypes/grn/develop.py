@@ -34,7 +34,6 @@ class Develop:
         self.cells = []
         self.queried_substrate = {}
         self.phenotype_body = None
-        self.promotors = []
         self.quantity_modules = 0
 
         self.regulatory_transcription_factor_idx = 0
@@ -77,6 +76,7 @@ class Develop:
 
     # parses genotype to discover promotor sites and compose genes
     def gene_parser(self):
+        promotors = []
         nucleotide_idx = 0
         while nucleotide_idx < len(self.genotype):
             if self.genotype[nucleotide_idx] < self.promoter_threshold:
@@ -159,11 +159,11 @@ class Develop:
                         diffusion_site_label,
                     ]
 
-                    self.promotors.append(gene)
+                    promotors.append(gene)
 
                     nucleotide_idx += self.types_nucleotypes
             nucleotide_idx += 1
-        self.promotors = np.array(self.promotors)
+        self.promotors = np.array(promotors)
         # pprint.pprint(self.promotors)
 
     def regulate(self):

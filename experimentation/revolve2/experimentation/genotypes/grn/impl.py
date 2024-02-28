@@ -25,9 +25,6 @@ class GRNInitParams(GenotypeInitParams):
 
 class GRNGenotype(IGenotype[GRNInitParams]):
     def __init__(self, params: GRNInitParams, gen: Genotype, seed: int) -> None:
-        self.developer = Develop(
-            max_modules=params.max_modules, genotype=gen, querying_seed=seed
-        )
         self.genotype = gen
         self.params = params
         self.seed = seed
@@ -37,7 +34,12 @@ class GRNGenotype(IGenotype[GRNInitParams]):
         return SymmetricalGRNGenotype(self)
 
     def develop(self) -> Body:
-        return self.developer.develop()
+        developer = Develop(
+            max_modules=self.params.max_modules,
+            genotype=self.genotype,
+            querying_seed=self.seed,
+        )
+        return developer.develop()
 
     def copy(self) -> Self:
         """Get a deeply copied version of the object"""
@@ -62,7 +64,7 @@ class GRNGenotype(IGenotype[GRNInitParams]):
     def _from_genotype(
         cls, genotype: Genotype, params: GRNInitParams, rng: np.random.Generator
     ):
-        return cls(params, genotype, rng.integers(0, 2**31))
+        return cls(params, genotype, int(rng.integers(2**31)))
 
 
 class SymmetricalGRNGenotype(SymmetricalGenotype):
