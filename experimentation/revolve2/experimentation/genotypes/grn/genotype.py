@@ -1,10 +1,8 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
-
 from typing import List
 
 
-@dataclass
 class Genotype:
-    genotype: List[float]
+    def __init__(self, genotype: List[float]):
+        assert isinstance(genotype, List)
+        assert all(isinstance(x, float) for x in genotype)
+        self.genotype = genotype
