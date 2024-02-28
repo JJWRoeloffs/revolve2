@@ -8,7 +8,7 @@ Can determine what representation to use with the genotype input parameter to ru
 """
 
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from pathlib import Path
 import asyncio
 import json
@@ -36,9 +36,13 @@ from revolve2.experimentation.genotypes.grn import GRNGenotype, GRNInitParams
 from revolve2.ci_group.simulation import create_batch_single_robot_standard
 from revolve2.ci_group import terrains, fitness_functions
 from revolve2.simulators.mujoco import LocalRunner
+from revolve2.simulation import Terrain
+
 
 # UNDER CONSTRUCTION
-def initialize_GRNGenotype(num_individuals: int, rng) -> List[IGenotype]:
+def initialize_GRNGenotype(
+    num_individuals: int, rng: np.random.Generator
+) -> List[GRNGenotype]:
     # If you run with a set seed, use the following lines instead.
     # SEED = 1234
     # rng = revolve2.ci_group.rng.make_rng(SEED)
@@ -46,11 +50,17 @@ def initialize_GRNGenotype(num_individuals: int, rng) -> List[IGenotype]:
     params = GRNInitParams(max_modules=10)
     return GRNGenotype.random_individuals(params, num_individuals, rng)
 
-def initialize_TreeGenotype(num_individuals: int, rng) -> List[IGenotype]:
+
+def initialize_TreeGenotype(
+    num_individuals: int, rng: np.random.Generator
+) -> List[TreeGenotype]:
     params = TreeInitParameters(max_depth=5)
     return TreeGenotype.random_individuals(params, num_individuals, rng)
 
-def initialize_CAGenotype(num_individuals: int, rng) -> List[IGenotype]:
+
+def initialize_CAGenotype(
+    num_individuals: int, rng: np.random.Generator
+) -> List[CAGenotype]:
     # If you run with a set seed, use the following lines instead.
     # SEED = 1234
     # rng = revolve2.ci_group.rng.make_rng(SEED)
@@ -58,7 +68,15 @@ def initialize_CAGenotype(num_individuals: int, rng) -> List[IGenotype]:
     params = CAInitParameters(domain_size=10, iterations=6, nr_rules=10)
     return CAGenotype.random_individuals(params, num_individuals, rng)
 
-def run_generation(previous_population: List[IGenotype], itteration: int, rng, symmetrical : bool = False, weightless : bool = False, terrain : terrains = terrains.flat()):
+
+def run_generation(
+    previous_population: List[IGenotype],
+    itteration: int,
+    rng: np.random.Generator,
+    symmetrical: bool = False,
+    weightless: bool = False,
+    terrain: Terrain = terrains.flat(),
+):
     """
     Run all runs of an experiment using the provided parameters.
 
@@ -73,7 +91,6 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng, s
         else:
             g = individual.mutate(rng)
 
-
         body = g.develop()
 
         body_measures = MorphologicalMeasures(body=body)
@@ -83,7 +100,7 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng, s
         # Combine the body and brain into a modular robot.
         robot = ModularRobot(body, brain)
         render_robot(robot, Path() / f"{itteration}_{itter}_robot.png")
-        #ADD TERRAINS HERE terrains.slope, terrains.flat
+        # ADD TERRAINS HERE terrains.slope, terrains.flat
         batch = create_batch_single_robot_standard(robot=robot, terrain=terrain)
 
         runner = LocalRunner(headless=True, make_it_rain=weightless)
@@ -104,7 +121,7 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng, s
 
         generation_fitness.append(xy_displacement)
 
-        #logging xy symmetry
+        # logging xy symmetry
         logging.info(f"xy_symmetry = {body_measures.xy_symmetry}")
         logging.info(f"xz_symmetry = {body_measures.xz_symmetry}")
         logging.info(f"yz_symmetry = {body_measures.yz_symmetry}")
@@ -115,7 +132,10 @@ def run_generation(previous_population: List[IGenotype], itteration: int, rng, s
 
     return generation_fitness, current_population
 
-def survivor_selection(generation_fitness, population, percent_survivors):
+
+def survivor_selection(
+    generation_fitness, population, percent_survivors
+) -> List[IGenotype]:
     # Create a list of (fitness, individual_id) tuples and sort it in descending order
     fitness_with_id = [(fitness, i) for i, fitness in enumerate(generation_fitness)]
     fitness_with_id.sort(reverse=True)
@@ -135,7 +155,8 @@ def survivor_selection(generation_fitness, population, percent_survivors):
 
     return top_individuals
 
-def save_population_to_file(population: List[IGenotype], file_path: Path):
+
+def save_ca_population_to_file(population: List[CAGenotype], file_path: Path):
     population_data = [
         {str(k): v for k, v in individual._ca_type.rule_set.items()}
         for individual in population
@@ -144,12 +165,14 @@ def save_population_to_file(population: List[IGenotype], file_path: Path):
         json.dump(population_data, f)
 
 
-def run_experiment(num_generations: int, 
-                   num_individuals: int, 
-                   genotype: int = None, 
-                   symmetrical : bool = True, 
-                   weightless : bool = False, 
-                   terrain : terrains = terrains.flat()) -> None:
+def run_experiment(
+    num_generations: int,
+    num_individuals: int,
+    genotype: Optional[int] = None,
+    symmetrical: bool = True,
+    weightless: bool = False,
+    terrain: Terrain = terrains.flat(),
+) -> None:
     """Run the simulation."""
     # Set up standard logging.
     # This decides the level of severity of logged messages we want to display.
@@ -172,7 +195,6 @@ def run_experiment(num_generations: int,
         case _:
             population = initialize_TreeGenotype(num_individuals, rng)
 
-
     for i, individual in enumerate(population):
         if symmetrical:
             g = individual.mutate(rng).as_symmetrical()
@@ -187,7 +209,9 @@ def run_experiment(num_generations: int,
             pass
 
     for i in range(num_generations):
-        generation_fitness, population_next = run_generation(population, i, rng, symmetrical, weightless, terrain)
+        generation_fitness, population_next = run_generation(
+            population, i, rng, symmetrical, weightless, terrain
+        )
         fitness_data.append([generation_fitness])
         population = survivor_selection(
             generation_fitness.copy(), population_next.copy(), 70
@@ -202,7 +226,7 @@ def run_experiment(num_generations: int,
     plt.savefig(Path() / f"fitness_dynamics_CA_g{num_generations}_p{num_individuals}")
 
     for i, individual in enumerate(population):
-  #      g = individual.mutate(rng)
+        #      g = individual.mutate(rng)
         body = individual.develop()
         brain = BrainCpgNetworkNeighborRandom(rng)
         robot = ModularRobot(body, brain)
@@ -214,4 +238,5 @@ def run_experiment(num_generations: int,
     # file_path = Path() / "last_population.json"
     # save_population_to_file(population, file_path)
 
-run_experiment(1,2)
+
+run_experiment(1, 2, 0)
