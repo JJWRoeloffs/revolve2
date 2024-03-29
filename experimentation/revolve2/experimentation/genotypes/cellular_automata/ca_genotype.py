@@ -1,24 +1,24 @@
 from __future__ import annotations
 
-import numpy as np
-import random
 import math
-from queue import Queue
-from typing import Any, Dict, Tuple, Set, List
-from typing_extensions import Self
+import random
 from dataclasses import dataclass
+from queue import Queue
+from typing import Any, Dict, List, Set, Tuple
 
+import numpy as np
+from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
+from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
 from revolve2.modular_robot import (
     ActiveHinge,
     Body,
     Brick,
     Core,
+    Directions,
     Module,
     MorphologicalMeasures,
 )
-from revolve2.modular_robot import Directions
-from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
-from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
+from typing_extensions import Self
 
 
 @dataclass

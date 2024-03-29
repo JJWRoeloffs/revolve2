@@ -49,7 +49,7 @@ class LocalRunner(Runner):
     _headless: bool
     _start_paused: bool
     _num_simulators: int
-    _make_it_rain : bool
+    _make_it_rain: bool
 
     def __init__(
         self,
@@ -243,7 +243,7 @@ class LocalRunner(Runner):
                     sample_step,
                     batch.simulation_time,
                     batch.simulation_timestep,
-                    self._make_it_rain
+                    self._make_it_rain,
                 )
                 for env_index, env_descr in enumerate(batch.environments)
             ]
@@ -255,7 +255,9 @@ class LocalRunner(Runner):
 
     @staticmethod
     def _make_model(
-        env_descr: Environment, simulation_timestep: float = 0.001, make_it_rain: bool = False
+        env_descr: Environment,
+        simulation_timestep: float = 0.001,
+        make_it_rain: bool = False,
     ) -> mujoco.MjModel:
         env_mjcf = mjcf.RootElement(model="environment")
 

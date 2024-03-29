@@ -1,34 +1,38 @@
 import asyncio
-import numpy as np
 import json
 
 import config
+import numpy as np
 import revolve2.ci_group.rng
+from revolve2.ci_group import fitness_functions, terrains
 from revolve2.ci_group.logging import setup_logging
-from revolve2.ci_group import terrains, fitness_functions
 from revolve2.ci_group.rng import make_rng
 from revolve2.ci_group.simulation import create_batch_single_robot_standard
-from revolve2.modular_robot import ActiveHinge, Body, Brick, ModularRobot, RightAngles
-from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
-from revolve2.modular_robot import ModularRobot, get_body_states_single_robot
-from revolve2.simulators.mujoco import LocalRunner
-
 from revolve2.experimentation.genotypes.cellular_automata.ca_genotype import CAGenotype
 from revolve2.experimentation.genotypes.cellular_automata.develop import develop
-
+from revolve2.modular_robot import (
+    ActiveHinge,
+    Body,
+    Brick,
+    ModularRobot,
+    RightAngles,
+    get_body_states_single_robot,
+)
+from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
+from revolve2.simulators.mujoco import LocalRunner
 
 
 def load_population_from_file(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         loaded_population = [json.loads(line) for line in file]
-    
+
     # Convert keys from strings to tuples
     for individual in loaded_population:
         for key_str in list(individual.keys()):
-            key_tuple = tuple(map(float, key_str.strip('()').split(', ')))
+            key_tuple = tuple(map(float, key_str.strip("()").split(", ")))
             value = individual.pop(key_str)
             individual[key_tuple] = value
-    
+
     return loaded_population
 
 
@@ -48,7 +52,7 @@ def filter_unique_rules(population):
     return unique_population
 
 
-file_path = 'examples/ca_experiments/last_population.json'
+file_path = "examples/ca_experiments/last_population.json"
 loaded_population = load_population_from_file(file_path)
 unique_population = filter_unique_rules(loaded_population)
 

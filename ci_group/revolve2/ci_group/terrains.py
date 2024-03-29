@@ -27,6 +27,7 @@ def flat(size: Vector3 = Vector3([20.0, 20.0, 0.0])) -> Terrain:
         ]
     )
 
+
 def slope(
     size: tuple[float, float],
     angle: float,
@@ -37,8 +38,8 @@ def slope(
 
     It will look like::
 
-        /            
-       / 
+        /
+       /
       /
 
     :param size: Size of the slope.
@@ -53,13 +54,14 @@ def slope(
         int(NUM_EDGES * size[1] * granularity_multiplier),
     )
 
+    heightmap = slope_heightmap(size=size, num_edges=num_edges, angle=angle)
 
-    heightmap = slope_heightmap(size=size,num_edges=num_edges, angle=angle)
+    height = size[0] * math.tan(
+        angle * (math.pi / 180.0)
+    )  # calculate height of the slope given base line of triangle and angle
 
-    height = size[0] * math.tan(angle * (math.pi / 180.0)) #calculate height of the slope given base line of triangle and angle
-
-    if height <= 0 :
-        max_height =  1.0
+    if height <= 0:
+        max_height = 1.0
     else:
         max_height = height
 
@@ -74,6 +76,8 @@ def slope(
             )
         ]
     )
+
+
 def crater(
     size: tuple[float, float],
     ruggedness: float,
@@ -167,13 +171,12 @@ def rugged_heightmap(
         dtype=float,
     )
 
+
 def slope_heightmap(
-    size: tuple[float, float],
-    num_edges: tuple[int, int],
-    angle: float
+    size: tuple[float, float], num_edges: tuple[int, int], angle: float
 ) -> npt.NDArray[np.float_]:
-    if (angle >= 90) or (angle <= 0) :
-        raise ValueError('The given angle must be between 0 and 90 degrees')
+    if (angle >= 90) or (angle <= 0):
+        raise ValueError("The given angle must be between 0 and 90 degrees")
     """
     Create a terrain heightmap in the shape of a slope.
 
@@ -188,7 +191,9 @@ def slope_heightmap(
     :param num_edges: How many edges to use for the heightmap.
     :returns: The created heightmap as a 2 dimensional array.
     """
-    height = size[0] * math.tan(angle * (math.pi / 180.0)) #calculate height of the slope given base line of triangle and angle
+    height = size[0] * math.tan(
+        angle * (math.pi / 180.0)
+    )  # calculate height of the slope given base line of triangle and angle
     return np.fromfunction(
         np.vectorize(
             lambda y, x: y * (height / num_edges[1]),
@@ -197,6 +202,7 @@ def slope_heightmap(
         num_edges,
         dtype=float,
     )
+
 
 def bowl_heightmap(
     num_edges: tuple[int, int],

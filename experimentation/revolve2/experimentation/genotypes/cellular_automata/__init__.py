@@ -2,5 +2,4 @@
 
 from .ca_genotype import CAGenotype, CAInitParameters, SymmetricalCAGenotype
 
-
 __all__ = ("CAGenotype", "CAInitParameters", "SymmetricalCAGenotype")

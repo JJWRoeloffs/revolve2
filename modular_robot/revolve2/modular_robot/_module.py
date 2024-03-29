@@ -4,8 +4,8 @@ from typing import Optional
 
 from revolve2.simulation.actor import Color
 
-from ._not_finalized_error import NotFinalizedError
 from ._directions import Directions
+from ._not_finalized_error import NotFinalizedError
 
 
 class Module:

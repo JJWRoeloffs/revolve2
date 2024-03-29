@@ -8,7 +8,10 @@ from .running import Environment, PosedActor
 
 
 def create_environment_single_actor(
-    actor: Actor, controller: ActorController, terrain: Terrain, actor_starting_height: float = 0
+    actor: Actor,
+    controller: ActorController,
+    terrain: Terrain,
+    actor_starting_height: float = 0,
 ) -> Environment:
     """
     Create an environment for simulating a single actor.

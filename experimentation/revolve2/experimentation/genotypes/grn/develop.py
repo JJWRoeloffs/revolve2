@@ -1,9 +1,10 @@
 import math
 import random
 from typing import List, Optional, Tuple, Union
-import numpy as np
 
+import numpy as np
 from revolve2.modular_robot import ActiveHinge, Body, Brick, Core, Directions, Module
+
 from .genotype import Genotype
 
 

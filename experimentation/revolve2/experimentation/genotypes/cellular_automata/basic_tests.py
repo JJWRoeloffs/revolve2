@@ -1,9 +1,9 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from ca_genotype import CAGenotype, CAInitParameters, _CAGenotype
-from revolve2.modular_robot import MorphologicalMeasures, get_body_states_single_robot
-from revolve2.ci_group.rng import make_rng_time_seed
-import matplotlib.pyplot as plt
 from revolve2.ci_group import fitness_functions, modular_robots, terrains
+from revolve2.ci_group.rng import make_rng_time_seed
+from revolve2.modular_robot import MorphologicalMeasures, get_body_states_single_robot
 
 
 def main():
@@ -102,8 +102,9 @@ def additional():
 
 def modular_robot_test():
     import asyncio
-    import numpy as np
 
+    import numpy as np
+    import revolve2.ci_group.modular_robots as modrob
     from revolve2.ci_group import terrains
     from revolve2.ci_group.logging import setup_logging
     from revolve2.ci_group.rng import make_rng
@@ -117,7 +118,6 @@ def modular_robot_test():
     )
     from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
     from revolve2.simulators.mujoco import LocalRunner
-    import revolve2.ci_group.modular_robots as modrob
 
     dsize = 7
     domain = np.zeros((dsize, dsize))

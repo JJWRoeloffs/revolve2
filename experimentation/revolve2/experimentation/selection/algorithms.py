@@ -1,15 +1,12 @@
 from __future__ import annotations
 
+import random
 from abc import ABC, abstractmethod
+from typing import List, TypeVar
 
 import numpy as np
 from numpy.typing import NDArray
-
-from typing import List, TypeVar
-import random
-
 from revolve2.experimentation.genotypes.protocols import IGenotype
-
 
 Genotype = TypeVar("Genotype", bound=IGenotype)
 

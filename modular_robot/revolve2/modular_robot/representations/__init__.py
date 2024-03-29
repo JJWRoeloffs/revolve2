@@ -1,7 +1,8 @@
-from ._render import Render
+from pathlib import Path
+
 from revolve2.modular_robot import ModularRobot, MorphologicalMeasures
 
-from pathlib import Path
+from ._render import Render
 
 
 def render_robot(robot: ModularRobot, path: Path) -> None:

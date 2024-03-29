@@ -4,7 +4,7 @@ from queue import Queue
 from typing import Any
 
 import multineat
-from revolve2.modular_robot import ActiveHinge, Body, Brick, Core, Module, Directions
+from revolve2.modular_robot import ActiveHinge, Body, Brick, Core, Directions, Module
 
 
 @dataclass

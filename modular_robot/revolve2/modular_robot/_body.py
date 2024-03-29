@@ -10,9 +10,9 @@ from ._active_hinge import ActiveHinge
 from ._body_state import BodyState
 from ._brick import Brick
 from ._core import Core
+from ._directions import Directions
 from ._module import Module
 from ._not_finalized_error import NotFinalizedError
-from ._directions import Directions
 
 
 class Body:

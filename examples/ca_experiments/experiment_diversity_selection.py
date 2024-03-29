@@ -7,26 +7,31 @@ generated rule
 Run this file to start experiment. Visualize population by running visualize_last_population.py
 """
 
-import logging
-import numpy as np
 import asyncio
 import json
-import matplotlib.pyplot as plt
+import logging
 
 import config
+import matplotlib.pyplot as plt
+import numpy as np
 import revolve2.ci_group.rng
+from revolve2.ci_group import fitness_functions, terrains
 from revolve2.ci_group.logging import setup_logging
-from revolve2.ci_group import terrains, fitness_functions
 from revolve2.ci_group.rng import make_rng
 from revolve2.ci_group.simulation import create_batch_single_robot_standard
-from revolve2.modular_robot import ActiveHinge, Body, Brick, ModularRobot, RightAngles
-from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
-from revolve2.modular_robot import ModularRobot, get_body_states_single_robot
-from revolve2.simulators.mujoco import LocalRunner
-from revolve2.modular_robot import MorphologicalMeasures
-
 from revolve2.experimentation.genotypes.cellular_automata.ca_genotype import CAGenotype
 from revolve2.experimentation.genotypes.cellular_automata.develop import develop
+from revolve2.modular_robot import (
+    ActiveHinge,
+    Body,
+    Brick,
+    ModularRobot,
+    MorphologicalMeasures,
+    RightAngles,
+    get_body_states_single_robot,
+)
+from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
+from revolve2.simulators.mujoco import LocalRunner
 
 
 def initialize():
@@ -110,26 +115,30 @@ def run_experiment(previous_population, init_domain):
 
     return generation_fitness, current_population
 
+
 def body_to_num_grid(body):
-    """
-    
-    """
+    """ """
     body_measures = MorphologicalMeasures(body)
     revolve_grid = body_measures.body_as_grid
 
-    grid = np.zeros((body_measures.bounding_box_depth, body_measures.bounding_box_width))
+    grid = np.zeros(
+        (body_measures.bounding_box_depth, body_measures.bounding_box_width)
+    )
 
     for x in range(body_measures.bounding_box_depth):
         for y in range(body_measures.bounding_box_width):
             # if grid[x][y][body_measures.core_grid_position[2]] is not None:
             if "Brick" in str(revolve_grid[x][y][body_measures.core_grid_position[2]]):
                 grid[x][y] = 1
-            elif "ActiveHinge" in str(revolve_grid[x][y][body_measures.core_grid_position[2]]):
+            elif "ActiveHinge" in str(
+                revolve_grid[x][y][body_measures.core_grid_position[2]]
+            ):
                 grid[x][y] = 2
             elif "Core" in str(revolve_grid[x][y][body_measures.core_grid_position[2]]):
                 grid[x][y] = 3
 
     return grid
+
 
 def convert_grid_to_set(grid):
     number_positions = {0: set(), 1: set(), 2: set(), 3: set()}
@@ -138,20 +147,23 @@ def convert_grid_to_set(grid):
             number_positions[grid[i][j]].add((i, j))
     return number_positions
 
+
 # Diversity measure
 def jaccard_similarity(grid1, grid2):
     set1 = convert_grid_to_set(grid1)
     set2 = convert_grid_to_set(grid2)
-    
+
     intersection = sum(len(set1[num] & set2[num]) for num in range(4))
     union = sum(len(set1[num] | set2[num]) for num in range(4))
-    
+
     similarity = intersection / union if union != 0 else 0  # Avoid division by zero
-    
+
     return similarity
 
 
-def survivor_selection_diversity(population, iters=20, similarity_cutoff=0.5, gene_length=10):
+def survivor_selection_diversity(
+    population, iters=20, similarity_cutoff=0.5, gene_length=10
+):
     """
     Pairwise selection between all individuals of a population.
 
@@ -160,7 +172,7 @@ def survivor_selection_diversity(population, iters=20, similarity_cutoff=0.5, ge
 
     If individual is deleted, replaces it with a random individual (i.e. with a random rule set)
 
-    param iters:  number of CA iterations for generating body 
+    param iters:  number of CA iterations for generating body
     """
     next_population = population.copy()
 
@@ -170,7 +182,7 @@ def survivor_selection_diversity(population, iters=20, similarity_cutoff=0.5, ge
 
     for i in range(len(next_population) - 2):
         for j in range(len(next_population) - 2):
-            print(f'i, j = {i, j}')
+            print(f"i, j = {i, j}")
             if i != j:
                 g1 = CAGenotype()
                 g1.rule_set = population[i]
@@ -195,21 +207,21 @@ def survivor_selection_diversity(population, iters=20, similarity_cutoff=0.5, ge
                 if len(population) > len(next_population):
                     while len(population) > len(next_population):
                         g = CAGenotype()
-                        g.set_params(init_state=init_domain, iterations=iters, rule_set={})
+                        g.set_params(
+                            init_state=init_domain, iterations=iters, rule_set={}
+                        )
                         g.generate_random_genotype(gene_length)
                         next_population.append(g.rule_set)
 
     return next_population
 
 
-
 def save_population_to_file(population, file_path):
-    with open(file_path, 'w') as file:
-        for individual in population: 
+    with open(file_path, "w") as file:
+        for individual in population:
             converted_individual = {str(k): v for k, v in individual.items()}
             json.dump(converted_individual, file)
-            file.write('\n')
-
+            file.write("\n")
 
 
 def main() -> None:
@@ -238,21 +250,21 @@ def main() -> None:
         population = survivor_selection_diversity(population_next.copy())
 
     plt.figure()
-    plt.title(f'# generations = {config.NUM_GENERATIONS}, population size = {config.NUM_INDIVIDUALS}')
-    plt.xlabel('generation')
-    plt.ylabel('mean fitness')
+    plt.title(
+        f"# generations = {config.NUM_GENERATIONS}, population size = {config.NUM_INDIVIDUALS}"
+    )
+    plt.xlabel("generation")
+    plt.ylabel("mean fitness")
     fitness_means = []
     x = [i for i in range(len(fitness_data))]
     for i in range(len(fitness_data)):
         fitness_means.append(np.mean(fitness_data[i]))
 
     plt.plot(x, fitness_means)
-    #plt.savefig(f'examples/ca_experiments/fitness_dynamics_CA_g{config.NUM_GENERATIONS}_p{config.NUM_INDIVIDUALS}')
+    # plt.savefig(f'examples/ca_experiments/fitness_dynamics_CA_g{config.NUM_GENERATIONS}_p{config.NUM_INDIVIDUALS}')
 
-    file_path = 'examples/ca_experiments/last_population.json'
+    file_path = "examples/ca_experiments/last_population.json"
     save_population_to_file(population, file_path)
-
-
 
 
 if __name__ == "__main__":

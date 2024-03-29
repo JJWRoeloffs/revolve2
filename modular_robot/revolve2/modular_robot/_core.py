@@ -1,7 +1,7 @@
 from revolve2.simulation.actor import Color
 
-from ._module import Module
 from ._directions import Directions, RightAngles
+from ._module import Module
 
 
 class Core(Module):

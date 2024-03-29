@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import numbers
 from enum import Enum, IntEnum, unique
+from math import inf, isclose, pi
 from types import NotImplementedType
 from typing import List, Literal
-from math import inf, pi, isclose
-import numbers
 
 
 class RightAngles(Enum):

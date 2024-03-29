@@ -6,8 +6,8 @@ from typing import Generic, List, TypeVar
 from typing_extensions import TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
-    from revolve2.modular_robot import Body
     import numpy as np
+    from revolve2.modular_robot import Body
 
 
 class GenotypeInitParams(ABC):

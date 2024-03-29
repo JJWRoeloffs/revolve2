@@ -1,9 +1,9 @@
-import cairo
 import math
 from pathlib import Path
+from typing import List, Optional
 
+import cairo
 from revolve2.modular_robot import Directions, RightAngles
-from typing import Optional, List
 
 
 class Canvas:

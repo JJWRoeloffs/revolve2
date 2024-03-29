@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-
-from typing import Iterable, Optional, List, Tuple, Set, TypeVar
-from typing_extensions import Self
+from typing import Iterable, List, Optional, Set, Tuple, TypeVar
 
 from revolve2.modular_robot import (
+    ActiveHinge,
+    Brick,
+    Core,
     Directions,
     Module,
-    Core,
-    Brick,
-    ActiveHinge,
     RightAngles,
 )
+from typing_extensions import Self
 
 
 class Node(ABC):

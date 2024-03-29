@@ -1,13 +1,13 @@
 from .algorithms import (
+    DeterministicSelection,
+    RouletteSelection,
     SelectionAlgorithm,
     TournamentSelection,
-    RouletteSelection,
-    DeterministicSelection,
 )
 
 __all__ = (
+    "DeterministicSelection",
+    "RouletteSelection",
     "SelectionAlgorithm",
     "TournamentSelection",
-    "RouletteSelection",
-    "DeterministicSelection",
 )

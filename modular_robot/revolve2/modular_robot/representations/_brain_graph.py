@@ -1,8 +1,8 @@
-from graphviz import Digraph
-
 # belong to TODO
 import fnmatch
 import os
+
+from graphviz import Digraph
 
 
 class BrainGraph:

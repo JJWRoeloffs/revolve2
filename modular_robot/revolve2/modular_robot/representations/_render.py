@@ -1,7 +1,9 @@
 from pathlib import Path
+
+from revolve2.modular_robot import ActiveHinge, Brick, Core, Directions, Module
+
 from ._canvas import Canvas
 from ._grid import Grid
-from revolve2.modular_robot import Core, ActiveHinge, Brick, Directions, Module
 
 
 class Render:

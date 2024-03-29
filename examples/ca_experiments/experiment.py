@@ -4,39 +4,36 @@ fixed starting gene length (dict of CA rules) and mutation that replaces one ran
 generated rule
 """
 
-import logging
-from typing import List, Tuple
-import numpy as np
 import asyncio
 import json
-import matplotlib.pyplot as plt
+import logging
 from pathlib import Path
-
-from numpy.typing import NDArray
+from typing import List, Tuple
 
 import config
+import matplotlib.pyplot as plt
+import numpy as np
 import revolve2.ci_group.rng
+from numpy.typing import NDArray
+from revolve2.ci_group import fitness_functions, terrains
 from revolve2.ci_group.logging import setup_logging
-from revolve2.ci_group import terrains, fitness_functions
 from revolve2.ci_group.rng import make_rng
 from revolve2.ci_group.simulation import create_batch_single_robot_standard
+from revolve2.experimentation.genotypes.cellular_automata import (
+    CAGenotype,
+    CAInitParameters,
+)
 from revolve2.modular_robot import (
     ActiveHinge,
     Body,
     Brick,
     ModularRobot,
     RightAngles,
-    ModularRobot,
     get_body_states_single_robot,
 )
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
 from revolve2.modular_robot.representations import render_robot
 from revolve2.simulators.mujoco import LocalRunner
-
-from revolve2.experimentation.genotypes.cellular_automata import (
-    CAGenotype,
-    CAInitParameters,
-)
 
 
 def initialize() -> List[CAGenotype]:

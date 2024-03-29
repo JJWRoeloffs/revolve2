@@ -2,22 +2,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TypeVar, cast
-from typing_extensions import Self
 
 from numpy.random import Generator
-from revolve2.modular_robot import Body, Core, Directions
-
 from revolve2.experimentation.genotypes.protocols import (
-    Node,
-    CoreNode,
-    BrickNode,
     ActiveHingeNode,
-    RotatedActiveHingeNode,
-    without_overlap,
+    BrickNode,
+    CoreNode,
     GenotypeInitParams,
     IGenotype,
+    Node,
+    RotatedActiveHingeNode,
     SymmetricalGenotype,
+    without_overlap,
 )
+from revolve2.modular_robot import Body, Core, Directions
+from typing_extensions import Self
 
 Node_T = TypeVar("Node_T", bound=Node)
 

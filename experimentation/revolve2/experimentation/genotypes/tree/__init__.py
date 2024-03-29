@@ -1,3 +1,3 @@
-from .tree_genotype import TreeGenotype, TreeInitParameters, SymmetricalTreeGenotype
+from .tree_genotype import SymmetricalTreeGenotype, TreeGenotype, TreeInitParameters
 
-__all__ = ("TreeInitParameters", "TreeGenotype", "SymmetricalTreeGenotype")
+__all__ = ("SymmetricalTreeGenotype", "TreeGenotype", "TreeInitParameters")

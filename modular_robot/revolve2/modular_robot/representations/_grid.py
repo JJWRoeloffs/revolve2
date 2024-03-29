@@ -1,5 +1,6 @@
-from revolve2.modular_robot import Directions, RightAngles
 from typing import Optional
+
+from revolve2.modular_robot import Directions, RightAngles
 
 
 class Grid:

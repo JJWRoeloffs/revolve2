@@ -2,20 +2,18 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
-from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
 
+import numpy as np
+from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
+from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
+from revolve2.modular_robot import Body
 from typing_extensions import Self
 
-from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
-
+from .crossover import crossover_v1
 from .develop import Develop
 from .genotype import Genotype
 from .mutate import mutate_body
-from .crossover import crossover_v1
 from .random import random_v1
-
-from revolve2.modular_robot import Body
-import numpy as np
 
 
 @dataclass

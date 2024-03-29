@@ -1,13 +1,12 @@
 from abc import abstractmethod
 from typing import cast
-from typing_extensions import Self
 
 import numpy as np
-
 from revolve2.modular_robot import Body, Core
+from typing_extensions import Self
 
 from .genotype import GenotypeInitParams, IGenotype
-from .nodes import Node, without_overlap, CoreNode
+from .nodes import CoreNode, Node, without_overlap
 
 
 class SymmetricalGenotype(IGenotype):
