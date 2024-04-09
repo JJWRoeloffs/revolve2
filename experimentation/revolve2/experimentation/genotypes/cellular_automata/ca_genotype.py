@@ -347,6 +347,22 @@ class CAGenotype(IGenotype[CAInitParameters]):
         newitem._ca_type.generate_random_genotype(params.nr_rules)
         return newitem
 
+    def to_json(self) -> Dict[str, Any]:
+        """Seralise the genotype to Json"""
+        return {
+            "type": "CAGenotype",
+            "gene": {str(k): v for k, v in self._ca_type.rule_set.items()},
+            "params": self.params.to_json(),
+        }
+
+    @classmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        """Deserialise the genotype from Json"""
+        assert json_out["type"] == "CAGenotype"
+        newitem = cls(CAInitParameters.from_json(json_out["params"]))
+        newitem._ca_type.rule_set = {eval(k): v for k, v in json_out["gene"].items()}
+        return newitem
+
 
 class SymmetricalCAGenotype(SymmetricalGenotype):
     @classmethod
