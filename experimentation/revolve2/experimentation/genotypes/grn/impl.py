@@ -7,6 +7,8 @@ import numpy as np
 from revolve2.experimentation.genotypes.protocols import GenotypeInitParams, IGenotype
 from revolve2.experimentation.genotypes.protocols.symmetrical import SymmetricalGenotype
 from revolve2.modular_robot import Body
+
+from typing import Dict, Any
 from typing_extensions import Self
 
 from .crossover import crossover_v1
@@ -51,6 +53,25 @@ class GRNGenotype(IGenotype[GRNInitParams]):
     def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
         genotype = crossover_v1(self.genotype, __o.genotype, rng)
         return self._from_genotype(genotype, self.params, rng)
+
+    def to_json(self) -> Dict[str, Any]:
+        """Seralise the genotype to Json"""
+        return {
+            "type": "GRNGenotype",
+            "gene": self.genotype.genotype,
+            "params": self.params.to_json(),
+            "seed": self.seed,
+        }
+
+    @classmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        """Deserialise the genotype from Json"""
+        assert json_out["type"] == "GRNGenotype"
+        return cls(
+            GRNInitParams.from_json(json_out["params"]),
+            Genotype(json_out["gene"]),
+            json_out["seed"],
+        )
 
     @classmethod
     def random(cls, params: GRNInitParams, rng: np.random.Generator) -> Self:
