@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Iterable, List, Optional, Set, Tuple, TypeVar
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, TypeVar
 
 from revolve2.modular_robot import (
     ActiveHinge,
@@ -104,6 +104,30 @@ class Node(ABC):
 
     def copy(self) -> Self:
         return self.__class__((d, c.copy()) for d, c in self.children)
+
+    def to_json(self) -> Dict[str, Any]:
+        ret = {str(int(d)): c.to_json() for d, c in self.children}
+        ret["type"] = self.__class__.__name__
+        return ret
+
+    @classmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        """Inverse of to_json. Hardcodes all implementations of this base class"""
+        node_type = json_out.pop("type")
+        match node_type:
+            case "CoreNode":
+                node = CoreNode
+            case "BrickNode":
+                node = BrickNode
+            case "ActiveHingeNode":
+                node = ActiveHingeNode
+            case "RotatedActiveHingeNode":
+                node = RotatedActiveHingeNode
+            case other:
+                raise ValueError(f"{other} is not a valid node type")
+        return node(
+            (Directions(int(d)), Node.from_json(c)) for d, c in json_out.items()
+        )
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, self.__class__):

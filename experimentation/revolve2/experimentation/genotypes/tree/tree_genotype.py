@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
-from typing import TypeVar, cast
+from typing import Any, Dict, TypeVar, cast
 
 from numpy.random import Generator
 from revolve2.experimentation.genotypes.protocols import (
@@ -85,6 +86,22 @@ class TreeGenotype(IGenotype[TreeInitParameters]):
             rng.choice(node.valid_attatchments()),
         )
         return self.__class__(self._params, newtree)
+
+    def to_json(self) -> Dict[str, Any]:
+        """Seralise the genotype to Json"""
+        return {
+            "type": "TreeGenotype",
+            "gene": self._tree.to_json(),
+            "params": self._params.to_json(),
+        }
+
+    @classmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        """Deserialise the genotype from Json"""
+        assert json_out["type"] == "TreeGenotype"
+        params = TreeInitParameters.from_json(json_out["params"])
+        tree = CoreNode.from_json(json_out["gene"])
+        return cls(params, tree)
 
 
 class SymmetricalTreeGenotype(SymmetricalGenotype):

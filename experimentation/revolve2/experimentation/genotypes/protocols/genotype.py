@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from abc import ABC, abstractmethod
-from typing import Generic, List, TypeVar
+from typing import Any, Dict, Generic, List, TypeVar
 
 from typing_extensions import TYPE_CHECKING, Self
 
@@ -14,6 +15,14 @@ class GenotypeInitParams(ABC):
     @abstractmethod
     def __init__(self) -> None:
         ...
+
+    def to_json(self) -> Dict[str, Any]:
+        """Return the Json of the params"""
+        return self.__dict__
+
+    @classmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        return cls(**json_out)
 
 
 InitParams = TypeVar("InitParams", bound=GenotypeInitParams)
@@ -43,6 +52,15 @@ class IGenotype(Generic[InitParams], ABC):
     @abstractmethod
     def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
         """Perform crossover between two individuals. Return a new copy"""
+
+    @abstractmethod
+    def to_json(self) -> Dict[str, Any]:
+        """Seralise the genotype to Json"""
+
+    @classmethod
+    @abstractmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        """Deserialise the genotype from Json"""
 
     @classmethod
     @abstractmethod
