@@ -8,7 +8,7 @@ Can determine what representation to use with the genotype input parameter to ru
 """
 
 import logging
-from typing import List, Optional, Tuple
+from typing import List, Optional, Sequence, Tuple
 from pathlib import Path
 import asyncio
 import json
@@ -42,7 +42,7 @@ from revolve2.simulation import Terrain
 # UNDER CONSTRUCTION
 def initialize_GRNGenotype(
     num_individuals: int, rng: np.random.Generator
-) -> List[GRNGenotype]:
+) -> Sequence[GRNGenotype]:
     # If you run with a set seed, use the following lines instead.
     # SEED = 1234
     # rng = revolve2.ci_group.rng.make_rng(SEED)
@@ -53,14 +53,14 @@ def initialize_GRNGenotype(
 
 def initialize_TreeGenotype(
     num_individuals: int, rng: np.random.Generator
-) -> List[TreeGenotype]:
+) -> Sequence[TreeGenotype]:
     params = TreeInitParameters(max_depth=5)
     return TreeGenotype.random_individuals(params, num_individuals, rng)
 
 
 def initialize_CAGenotype(
     num_individuals: int, rng: np.random.Generator
-) -> List[CAGenotype]:
+) -> Sequence[CAGenotype]:
     # If you run with a set seed, use the following lines instead.
     # SEED = 1234
     # rng = revolve2.ci_group.rng.make_rng(SEED)
@@ -70,7 +70,7 @@ def initialize_CAGenotype(
 
 
 def run_generation(
-    previous_population: List[IGenotype],
+    previous_population: Sequence[IGenotype],
     itteration: int,
     rng: np.random.Generator,
     symmetrical: bool = False,
@@ -135,7 +135,7 @@ def run_generation(
 
 def survivor_selection(
     generation_fitness, population, percent_survivors
-) -> List[IGenotype]:
+) -> Sequence[IGenotype]:
     # Create a list of (fitness, individual_id) tuples and sort it in descending order
     fitness_with_id = [(fitness, i) for i, fitness in enumerate(generation_fitness)]
     fitness_with_id.sort(reverse=True)
@@ -154,15 +154,6 @@ def survivor_selection(
         top_individuals.append(top_individuals[i % num_survivors])
 
     return top_individuals
-
-
-def save_ca_population_to_file(population: List[CAGenotype], file_path: Path):
-    population_data = [
-        {str(k): v for k, v in individual._ca_type.rule_set.items()}
-        for individual in population
-    ]
-    with open(file_path, "w") as f:
-        json.dump(population_data, f)
 
 
 def run_experiment(
