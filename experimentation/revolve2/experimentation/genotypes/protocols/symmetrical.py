@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import cast
+from typing import Any, Dict, cast
 
 import numpy as np
 from revolve2.modular_robot import Body, Core
@@ -49,3 +49,10 @@ class SymmetricalGenotype(IGenotype):
 
     def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
         return self.__class__(self.base.crossover(rng, __o))
+
+    def to_json(self) -> Dict[str, Any]:
+        return self.base.to_json()
+
+    @classmethod
+    def from_json(cls, json_out: Dict[str, Any]) -> Self:
+        return cls(cls.wrapped().from_json(json_out))
