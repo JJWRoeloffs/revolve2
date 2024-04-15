@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, TypeVar
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar
 
 from revolve2.modular_robot import (
     ActiveHinge,
@@ -214,24 +214,23 @@ Location = Tuple[int, int]
 NODES = [CoreNode, BrickNode, ActiveHingeNode, RotatedActiveHingeNode]
 
 
+def _add_angle(location: Location, d: Directions) -> Location:
+    x, y = location
+    match d:
+        case Directions.FRONT:
+            return x, y + 1
+        case Directions.BACK:
+            return x, y - 1
+        case Directions.RIGHT:
+            return x + 1, y
+        case Directions.LEFT:
+            return x - 1, y
+
+
 def without_overlap(
     tree: Node_T, max_x: int = 10, min_x: int = -10, max_y: int = 10, min_y: int = -10
 ) -> Node_T:
     _occupied_slots: Set[Location] = set()
-
-    # Yes, this can be done with vector algebra,
-    # However, counterargument: I am lazy
-    def add_angle(location: Location, d: Directions) -> Location:
-        x, y = location
-        match d:
-            case Directions.FRONT:
-                return x, y + 1
-            case Directions.BACK:
-                return x, y - 1
-            case Directions.RIGHT:
-                return x + 1, y
-            case Directions.LEFT:
-                return x - 1, y
 
     def inner(node: Node_T, par_d: Directions, location: Location) -> Node_T:
         assert location not in _occupied_slots
@@ -239,7 +238,7 @@ def without_overlap(
         new_children: List[Tuple[Directions, Node]] = []
         for child_d, child in node.children:
             new_dir = Directions.from_angle(par_d.to_angle() + child_d.to_angle())
-            child_loc = add_angle(location, new_dir)
+            child_loc = _add_angle(location, new_dir)
             if not (min_x <= child_loc[0] <= max_x):
                 continue
             if not (min_y <= child_loc[1] <= max_y):
@@ -251,6 +250,26 @@ def without_overlap(
         return node.__class__(new_children)
 
     return inner(tree, Directions.FRONT, (0, 0))
+
+
+def to_grid(tree: Node_T) -> List[List[Optional[Node_T]]]:
+    def inner(
+        node: Node_T, par_d: Directions, location: Location
+    ) -> Iterator[Tuple[Location, Node_T]]:
+        yield (location, node)
+        for child_d, child in node.children:
+            new_dir = Directions.from_angle(par_d.to_angle() + child_d.to_angle())
+            child_loc = _add_angle(location, new_dir)
+            yield from inner(child, new_dir, child_loc)
+
+    locs = {k: v for k, v in inner(tree, Directions.FRONT, (0, 0))}
+    return [
+        [
+            locs.get((x, y), None)
+            for x in range(min(x[0] for x in locs), max(x[0] for x in locs) + 1)
+        ]
+        for y in range(min(x[1] for x in locs), max(x[1] for x in locs) + 1)
+    ]
 
 
 def print_tree(tree: Node) -> None:
