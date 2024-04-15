@@ -29,8 +29,8 @@ def flat(size: Vector3 = Vector3([20.0, 20.0, 0.0])) -> Terrain:
 
 
 def slope(
-    size: tuple[float, float],
-    angle: float,
+    size: tuple[float, float] = (20.0, 20.0),
+    angle: float = 45,
     granularity_multiplier: float = 1.0,
 ) -> Terrain:
     """

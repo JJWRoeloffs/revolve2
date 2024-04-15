@@ -98,12 +98,16 @@ class _CAGenotype:
         del self.rule_set[existing_key]
 
     def crossover(self, rng: np.random.Generator, *__o: _CAGenotype) -> _CAGenotype:
-        raise NotImplementedError
-        # new_dict = rhs.rule_set.copy()
-        # for _ in range(len(new_dict) // 2):
-        #     new_dict.pop(random.randint(0, len(rhs.rule_set)))
+        [parent] = __o
+        new_dict = parent.rule_set.copy()
+        for _ in range(len(new_dict) // 2):
+            try:
+                new_dict.pop(rng.integers(0, len(parent.rule_set)))
+            except KeyError:
+                pass
 
-        # return {**new_dict, **lhs.rule_set}
+        new_rule_set = {**new_dict, **self.rule_set}
+        return self.__class__(self.init_state, self.iterations, new_rule_set)
 
     def generate_random_genotype(self, n):
         possible_values = [0.0, 1.0, 2.0]
@@ -339,7 +343,9 @@ class CAGenotype(IGenotype[CAInitParameters]):
         return newitem
 
     def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
-        raise NotImplementedError
+        newitem = self.__class__(self.params)
+        newitem._ca_type = self._ca_type.crossover(rng, __o._ca_type)
+        return newitem
 
     @classmethod
     def random(cls, params: CAInitParameters, rng: np.random.Generator) -> CAGenotype:

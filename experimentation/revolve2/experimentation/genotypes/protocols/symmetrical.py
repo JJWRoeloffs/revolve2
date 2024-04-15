@@ -48,7 +48,7 @@ class SymmetricalGenotype(IGenotype):
         return self.__class__(self.base.mutate(rng))
 
     def crossover(self, rng: np.random.Generator, __o: Self) -> Self:
-        return self.__class__(self.base.crossover(rng, __o))
+        return self.__class__(self.base.crossover(rng, __o.base))
 
     def to_json(self) -> Dict[str, Any]:
         return self.base.to_json()

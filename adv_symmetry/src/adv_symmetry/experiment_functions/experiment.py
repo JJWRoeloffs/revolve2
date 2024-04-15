@@ -7,11 +7,11 @@ Can determine what representation to use with the genotype input parameter to ru
 2 == CA
 """
 
+import json
 import logging
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence
 from pathlib import Path
 import asyncio
-import json
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -20,7 +20,10 @@ from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
 from revolve2.modular_robot import (
     ModularRobot,
     get_body_states_single_robot,
-    MorphologicalMeasures,
+)
+from revolve2.experimentation.symmetry_measures import (
+    calculate_horizontal_symmetry,
+    calculate_vertical_symmetry,
 )
 from revolve2.experimentation.genotypes.protocols import IGenotype
 from revolve2.modular_robot.representations import render_robot
@@ -43,10 +46,6 @@ from revolve2.simulation import Terrain
 def initialize_GRNGenotype(
     num_individuals: int, rng: np.random.Generator
 ) -> Sequence[GRNGenotype]:
-    # If you run with a set seed, use the following lines instead.
-    # SEED = 1234
-    # rng = revolve2.ci_group.rng.make_rng(SEED)
-
     params = GRNInitParams(max_modules=10)
     return GRNGenotype.random_individuals(params, num_individuals, rng)
 
@@ -61,10 +60,6 @@ def initialize_TreeGenotype(
 def initialize_CAGenotype(
     num_individuals: int, rng: np.random.Generator
 ) -> Sequence[CAGenotype]:
-    # If you run with a set seed, use the following lines instead.
-    # SEED = 1234
-    # rng = revolve2.ci_group.rng.make_rng(SEED)
-
     params = CAInitParameters(domain_size=10, iterations=6, nr_rules=10)
     return CAGenotype.random_individuals(params, num_individuals, rng)
 
@@ -86,20 +81,21 @@ def run_generation(
     current_population = []
 
     for itter, individual in enumerate(previous_population):
+        other_parent: IGenotype = rng.choice(np.array(previous_population))
+        intermediary = individual.crossover(rng, other_parent)
         if symmetrical:
-            g = individual.mutate(rng).as_symmetrical()
+            g = intermediary.mutate(rng).as_symmetrical()
         else:
-            g = individual.mutate(rng)
+            g = intermediary.mutate(rng)
 
         body = g.develop()
-
-        body_measures = MorphologicalMeasures(body=body)
+        with (Path() / f"{itter}_{itteration}.json").open("a", encoding="utf-8") as f:
+            json.dump(g.to_json(), f)
 
         # We choose a 'CPG' brain with random parameters (the exact working will not be explained here).
         brain = BrainCpgNetworkNeighborRandom(rng)
         # Combine the body and brain into a modular robot.
         robot = ModularRobot(body, brain)
-        render_robot(robot, Path() / f"{itteration}_{itter}_robot.png")
         # ADD TERRAINS HERE terrains.slope, terrains.flat
         batch = create_batch_single_robot_standard(robot=robot, terrain=terrain)
 
@@ -121,12 +117,12 @@ def run_generation(
 
         generation_fitness.append(xy_displacement)
 
+        vert_symmetry = calculate_vertical_symmetry(body)
+        hor_symmetry = calculate_horizontal_symmetry(body)
         # logging xy symmetry
-        logging.info(f"xy_symmetry = {body_measures.xy_symmetry}")
-        logging.info(f"xz_symmetry = {body_measures.xz_symmetry}")
-        logging.info(f"yz_symmetry = {body_measures.yz_symmetry}")
-
-        logging.info(f"xy_displacement = {xy_displacement}")
+        logging.info(
+            f"vert_symmetry = {vert_symmetry}, hor_symmetry = {hor_symmetry} xy_displacement = {xy_displacement}"
+        )
 
         current_population.append(g)
 
@@ -162,7 +158,8 @@ def run_experiment(
     genotype: Optional[int] = None,
     symmetrical: bool = True,
     weightless: bool = False,
-    terrain: Terrain = terrains.flat(),
+    terrain_type: Optional[int] = None,
+    seed: Optional[int] = None,
 ) -> None:
     """Run the simulation."""
     # Set up standard logging.
@@ -172,9 +169,17 @@ def run_experiment(
     # If logging is not set up, important messages can be missed.
     # We also provide a file name, so the log will be written to both the console and that file.
     setup_logging(file_name="log.txt")
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed)
 
     fitness_data = []
+
+    match terrain_type:
+        case 0:
+            terrain = terrains.flat()
+        case 1:
+            terrain = terrains.slope()
+        case _:
+            terrain = terrains.flat()
 
     match genotype:
         case 0:
@@ -230,4 +235,5 @@ def run_experiment(
     # save_population_to_file(population, file_path)
 
 
-run_experiment(1, 2, 0)
+if __name__ == "__main__":
+    run_experiment(1, 2, 0)

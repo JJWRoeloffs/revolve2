@@ -3,7 +3,7 @@ import json
 
 from typing import Dict, List
 
-from adv_symmetry.tree_run import run_experiment
+from adv_symmetry.experiment_functions import run_experiment
 from adv_symmetry.argument_schema import parse_json, Arguments
 
 
@@ -21,9 +21,7 @@ def parse_arguments(args: List[str]) -> Dict:
 
 
 def run(args: Arguments) -> None:
-    run_experiment(
-        num_generations=args.num_generations, num_individuals=args.num_individuals
-    )
+    run_experiment(**args.__dict__)
 
 
 def main(args: List[str]) -> None:
