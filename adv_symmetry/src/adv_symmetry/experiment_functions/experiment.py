@@ -7,9 +7,10 @@ Can determine what representation to use with the genotype input parameter to ru
 2 == CA
 """
 
+from dataclasses import dataclass
 import json
 import logging
-from typing import List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from pathlib import Path
 import asyncio
 import matplotlib.pyplot as plt
@@ -36,7 +37,7 @@ from revolve2.experimentation.genotypes.tree import (
     TreeInitParameters,
 )
 from revolve2.experimentation.genotypes.grn import GRNGenotype, GRNInitParams
-from revolve2.ci_group.simulation import create_batch_single_robot_standard
+from revolve2.ci_group.simulation import create_batch_multiple_isolated_robots_standard
 from revolve2.ci_group import terrains, fitness_functions
 from revolve2.simulators.mujoco import LocalRunner
 from revolve2.simulation import Terrain
@@ -64,6 +65,26 @@ def initialize_CAGenotype(
     return CAGenotype.random_individuals(params, num_individuals, rng)
 
 
+@dataclass
+class Result:
+    generation: int
+    index: int
+    fitness: float
+    vert_symmetry: float
+    hor_symmetry: float
+    genotype: IGenotype
+
+    def to_json(self) -> Dict[str, Any]:
+        return {
+            "generation": self.generation,
+            "index": self.index,
+            "fitness": self.fitness,
+            "vert_symmetry": self.vert_symmetry,
+            "hor_symmetry": self.hor_symmetry,
+            "genotype": self.genotype.to_json(),
+        }
+
+
 def run_generation(
     previous_population: Sequence[IGenotype],
     itteration: int,
@@ -71,41 +92,46 @@ def run_generation(
     symmetrical: bool = False,
     weightless: bool = False,
     terrain: Terrain = terrains.flat(),
-):
+) -> Tuple[List[float], Sequence[IGenotype]]:
     """
     Run all runs of an experiment using the provided parameters.
-
     """
-    # Create a list where we will store the success ratio for each repetition.
-    generation_fitness = []
-    current_population = []
-
+    ### SETUP
+    current_population: List[IGenotype] = []
+    new_robots: List[ModularRobot] = []
     for itter, individual in enumerate(previous_population):
         other_parent: IGenotype = rng.choice(np.array(previous_population))
-        intermediary = individual.crossover(rng, other_parent)
+
+        g = individual.crossover(rng, other_parent).mutate(rng)
         if symmetrical:
-            g = intermediary.mutate(rng).as_symmetrical()
-        else:
-            g = intermediary.mutate(rng)
+            g = g.as_symmetrical()
 
+        current_population.append(g)
         body = g.develop()
-        with (Path() / f"{itter}_{itteration}.json").open("a", encoding="utf-8") as f:
-            json.dump(g.to_json(), f)
-
         # We choose a 'CPG' brain with random parameters (the exact working will not be explained here).
         brain = BrainCpgNetworkNeighborRandom(rng)
         # Combine the body and brain into a modular robot.
-        robot = ModularRobot(body, brain)
-        # ADD TERRAINS HERE terrains.slope, terrains.flat
-        batch = create_batch_single_robot_standard(robot=robot, terrain=terrain)
+        new_robots.append(ModularRobot(body, brain))
 
-        runner = LocalRunner(headless=True, make_it_rain=weightless)
+    ### RUN
+    batch = create_batch_multiple_isolated_robots_standard(
+        new_robots, [terrain for _ in new_robots]
+    )
+    runner = LocalRunner(headless=True, make_it_rain=weightless)
+    results = asyncio.run(runner.run_batch(batch))
 
-        results = asyncio.run(runner.run_batch(batch))
-        environment_results = results.environment_results[0]
-
+    ### EVAL
+    res_file = (
+        Path()
+        / f"{itteration}_{type(previous_population[0]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.jsonl"
+    )
+    fp = res_file.open("a+", encoding="utf-8")
+    generation_fitness = []
+    for itter, environment_results in enumerate(results.environment_results):
         # We have to map the simulation results back to robot body space.
         # This function calculates the state of the robot body at the start and end of the simulation.
+        body = new_robots[itter].body
+        g = current_population[itter]
         body_state_begin, body_state_end = get_body_states_single_robot(
             body, environment_results
         )
@@ -119,12 +145,18 @@ def run_generation(
 
         vert_symmetry = calculate_vertical_symmetry(body)
         hor_symmetry = calculate_horizontal_symmetry(body)
-        # logging xy symmetry
-        logging.info(
-            f"vert_symmetry = {vert_symmetry}, hor_symmetry = {hor_symmetry} xy_displacement = {xy_displacement}"
+        result = Result(
+            generation=itteration,
+            index=itter,
+            fitness=xy_displacement,
+            vert_symmetry=vert_symmetry,
+            hor_symmetry=hor_symmetry,
+            genotype=g,
         )
+        json.dump(result.to_json(), fp)
+        fp.write("\n")
 
-        current_population.append(g)
+    fp.close()
 
     return generation_fitness, current_population
 

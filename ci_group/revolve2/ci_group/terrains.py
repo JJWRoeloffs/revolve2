@@ -24,7 +24,8 @@ def flat(size: Vector3 = Vector3([20.0, 20.0, 0.0])) -> Terrain:
                 orientation=Quaternion(),
                 size=size,
             )
-        ]
+        ],
+        name="flat",
     )
 
 
@@ -74,7 +75,8 @@ def slope(
                 base_thickness=0.1,
                 heights=heightmap,
             )
-        ]
+        ],
+        name="slope",
     )
 
 
@@ -131,7 +133,8 @@ def crater(
                 base_thickness=0.1 + ruggedness,
                 heights=heightmap,
             )
-        ]
+        ],
+        name="crater",
     )
 
 
