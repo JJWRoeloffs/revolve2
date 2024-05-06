@@ -2,9 +2,15 @@
 Different representation testing, generates robot with simple survivor selection (top k% of fittest) with
 fixed starting gene length and mutation
 Can determine what representation to use with the genotype input parameter to run_experiment
+
+Genotypes:
 0 == GRN
 1 == Tree
 2 == CA
+
+Terrains:
+0 == Flase
+1 == Slope
 """
 
 from dataclasses import dataclass
@@ -232,7 +238,11 @@ def run_experiment(
         brain = BrainCpgNetworkNeighborRandom(rng)
         robot = ModularRobot(body, brain)
         try:
-            render_robot(robot, Path() / f"{i}_initial.png")
+            res_file = (
+                Path()
+                / f"{i}_initial_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.png"
+            )
+            render_robot(robot, res_file)
         except IndexError:
             pass
 
@@ -260,7 +270,11 @@ def run_experiment(
         robot = ModularRobot(body, brain)
 
         try:
-            render_robot(robot, Path() / f"{i}_final.png")
+            res_file = (
+                Path()
+                / f"{i}_final_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.png"
+            )
+            render_robot(robot, res_file)
         except IndexError:
             pass
     # file_path = Path() / "last_population.json"
