@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import cast, Dict, Any
+from typing import cast, Optional, Dict, Any
 
 import marshmallow_dataclass
 
@@ -9,6 +9,11 @@ import marshmallow_dataclass
 class Arguments:
     num_generations: int
     num_individuals: int
+    genotype: Optional[int] = None
+    symmetrical: bool = True
+    weightless: bool = False
+    terrain_type: Optional[int] = None
+    seed: Optional[int] = None
 
 
 PARASER = marshmallow_dataclass.class_schema(Arguments)()

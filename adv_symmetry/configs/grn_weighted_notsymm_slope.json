@@ -1,0 +1,9 @@
+{
+  "num_generations": 50,
+  "num_individuals": 100,
+  "genotype": 0,
+  "symmetrical": false,
+  "weightless": false,
+  "terrain_type": 1
+}
+

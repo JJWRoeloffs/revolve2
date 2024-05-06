@@ -24,13 +24,14 @@ def flat(size: Vector3 = Vector3([20.0, 20.0, 0.0])) -> Terrain:
                 orientation=Quaternion(),
                 size=size,
             )
-        ]
+        ],
+        name="flat",
     )
 
 
 def slope(
-    size: tuple[float, float],
-    angle: float,
+    size: tuple[float, float] = (20.0, 20.0),
+    angle: float = 45,
     granularity_multiplier: float = 1.0,
 ) -> Terrain:
     """
@@ -74,7 +75,8 @@ def slope(
                 base_thickness=0.1,
                 heights=heightmap,
             )
-        ]
+        ],
+        name="slope",
     )
 
 
@@ -131,7 +133,8 @@ def crater(
                 base_thickness=0.1 + ruggedness,
                 heights=heightmap,
             )
-        ]
+        ],
+        name="crater",
     )
 
 
