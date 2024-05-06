@@ -1,6 +1,6 @@
 {
-  "num_generations": 5,
-  "num_individuals": 5,
+  "num_generations": 50,
+  "num_individuals": 100,
   "genotype": 0,
   "symmetrical": false,
   "weightless": false,

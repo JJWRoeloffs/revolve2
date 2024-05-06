@@ -1,7 +1,7 @@
 {
-  "num_generations": 5,
-  "num_individuals": 5,
-  "genotype": 2,
+  "num_generations": 50,
+  "num_individuals": 100,
+  "genotype": 1,
   "symmetrical": false,
   "weightless": false,
   "terrain_type": 1
