@@ -25,3 +25,6 @@ def x_displacement(begin_state: BodyState, end_state: BodyState) -> float:
 
 def y_displacement(begin_state: BodyState, end_state: BodyState) -> float:
     return abs(float(begin_state.core_position[1]) - float(end_state.core_position[1]))
+
+def x_displacement_punish_y_displacement(begin_state: BodyState, end_state: BodyState) -> float:
+    return (abs(float(begin_state.core_position[0]) - float(end_state.core_position[0])) - abs(float(begin_state.core_position[1]) - float(end_state.core_position[1])))

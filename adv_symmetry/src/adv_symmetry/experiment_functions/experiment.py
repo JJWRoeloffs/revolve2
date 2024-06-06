@@ -143,9 +143,14 @@ def run_generation(
         )
 
         # Calculate the xy displacement from the body states.
-        xy_displacement = fitness_functions.xy_displacement(
-            body_state_begin, body_state_end
-        )
+        if not terrain==terrains.slope():
+            xy_displacement = fitness_functions.xy_displacement(
+                body_state_begin, body_state_end
+            )
+        else:
+            xy_displacement = fitness_functions.x_displacement_punish_y_displacement(
+                body_state_begin, body_state_end
+            )
 
         generation_fitness.append(xy_displacement)
 
@@ -218,6 +223,8 @@ def run_experiment(
             terrain = terrains.slope()
         case _:
             terrain = terrains.flat()
+    
+    print(terrain.static_geometry)
 
     match genotype:
         case 0:
@@ -282,4 +289,4 @@ def run_experiment(
 
 
 if __name__ == "__main__":
-    run_experiment(1, 2, 0)
+    run_experiment(1, 2, 0,terrain_type=1)
