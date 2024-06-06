@@ -130,7 +130,7 @@ def run_generation(
     ### EVAL
     res_file = (
         Path()
-        / f"/results/{itteration}_{type(previous_population[0]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.jsonl"
+        / f"{itteration}_{type(previous_population[0]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.jsonl"
     )
     fp = res_file.open("a+", encoding="utf-8")
     generation_fitness = []
