@@ -268,7 +268,7 @@ def run_experiment(
     plt.ylabel("mean fitness")
 
     plt.plot(list(range(len(fitness_data))), [np.mean(x) for x in fitness_data])
-    plt.savefig(Path() / f"fitness_dynamics_CA_g{num_generations}_p{num_individuals}")
+    plt.savefig(Path() / f"fitness_dynamics_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}_g{num_generations}_p{num_individuals}")
 
     for i, individual in enumerate(population):
         #      g = individual.mutate(rng)
