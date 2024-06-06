@@ -98,6 +98,7 @@ def run_generation(
     symmetrical: bool = False,
     weightless: bool = False,
     terrain: Terrain = terrains.flat(),
+    is_slope = False
 ) -> Tuple[List[float], Sequence[IGenotype]]:
     """
     Run all runs of an experiment using the provided parameters.
@@ -129,7 +130,7 @@ def run_generation(
     ### EVAL
     res_file = (
         Path()
-        / f"{itteration}_{type(previous_population[0]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.jsonl"
+        / f"/results/{itteration}_{type(previous_population[0]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.jsonl"
     )
     fp = res_file.open("a+", encoding="utf-8")
     generation_fitness = []
@@ -143,15 +144,15 @@ def run_generation(
         )
 
         # Calculate the xy displacement from the body states.
-        if not terrain==terrains.slope():
-            xy_displacement = fitness_functions.xy_displacement(
-                body_state_begin, body_state_end
-            )
-        else:
+        if is_slope:
             xy_displacement = fitness_functions.x_displacement_punish_y_displacement(
                 body_state_begin, body_state_end
             )
 
+        else:
+            xy_displacement = fitness_functions.xy_displacement(
+                body_state_begin, body_state_end
+            )
         generation_fitness.append(xy_displacement)
 
         vert_symmetry = calculate_vertical_symmetry(body)
@@ -219,13 +220,14 @@ def run_experiment(
     match terrain_type:
         case 0:
             terrain = terrains.flat()
+            is_slope=False
         case 1:
             terrain = terrains.slope()
+            is_slope=True
         case _:
             terrain = terrains.flat()
+            is_slope=False
     
-    print(terrain.static_geometry)
-
     match genotype:
         case 0:
             population = initialize_GRNGenotype(num_individuals, rng)
@@ -247,15 +249,16 @@ def run_experiment(
         try:
             res_file = (
                 Path()
-                / f"{i}_initial_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.png"
+                /f"{i}_initial_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.png"
             )
+            print(res_file)
             render_robot(robot, res_file)
         except IndexError:
             pass
 
     for i in range(num_generations):
         generation_fitness, population_next = run_generation(
-            population, i, rng, symmetrical, weightless, terrain
+            population, i, rng, symmetrical, weightless, terrain,is_slope
         )
         fitness_data.append([generation_fitness])
         population = survivor_selection(
