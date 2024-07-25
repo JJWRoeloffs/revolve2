@@ -75,7 +75,7 @@ def initialize_CAGenotype(
 class Result:
     generation: int
     index: int
-    fitness: float
+    fitness: Optional[float]
     vert_symmetry: float
     hor_symmetry: float
     genotype: IGenotype
@@ -98,7 +98,7 @@ def run_generation(
     symmetrical: bool = False,
     weightless: bool = False,
     terrain: Terrain = terrains.flat(),
-    is_slope = False
+    is_slope=False,
 ) -> Tuple[List[float], Sequence[IGenotype]]:
     """
     Run all runs of an experiment using the provided parameters.
@@ -137,6 +137,24 @@ def run_generation(
     for itter, environment_results in enumerate(results.environment_results):
         # We have to map the simulation results back to robot body space.
         # This function calculates the state of the robot body at the start and end of the simulation.
+        if environment_results is None:
+            logging.warn("EXCEPTION IN MUJOCO: setting fitness to 0")
+            body = new_robots[itter].body
+            g = current_population[itter]
+            generation_fitness.append(0.0)
+            vert_symmetry = calculate_vertical_symmetry(body)
+            hor_symmetry = calculate_horizontal_symmetry(body)
+            result = Result(
+                generation=itteration,
+                index=itter,
+                fitness=None,
+                vert_symmetry=vert_symmetry,
+                hor_symmetry=hor_symmetry,
+                genotype=g,
+            )
+            json.dump(result.to_json(), fp)
+            fp.write("\n")
+            continue
         body = new_robots[itter].body
         g = current_population[itter]
         body_state_begin, body_state_end = get_body_states_single_robot(
@@ -220,14 +238,14 @@ def run_experiment(
     match terrain_type:
         case 0:
             terrain = terrains.flat()
-            is_slope=False
+            is_slope = False
         case 1:
             terrain = terrains.slope()
-            is_slope=True
+            is_slope = True
         case _:
             terrain = terrains.flat()
-            is_slope=False
-    
+            is_slope = False
+
     match genotype:
         case 0:
             population = initialize_GRNGenotype(num_individuals, rng)
@@ -249,7 +267,7 @@ def run_experiment(
         try:
             res_file = (
                 Path()
-                /f"{i}_initial_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.png"
+                / f"{i}_initial_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}.png"
             )
             print(res_file)
             render_robot(robot, res_file)
@@ -258,7 +276,7 @@ def run_experiment(
 
     for i in range(num_generations):
         generation_fitness, population_next = run_generation(
-            population, i, rng, symmetrical, weightless, terrain,is_slope
+            population, i, rng, symmetrical, weightless, terrain, is_slope
         )
         fitness_data.append([generation_fitness])
         population = survivor_selection(
@@ -271,7 +289,10 @@ def run_experiment(
     plt.ylabel("mean fitness")
 
     plt.plot(list(range(len(fitness_data))), [np.mean(x) for x in fitness_data])
-    plt.savefig(Path() / f"fitness_dynamics_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}_g{num_generations}_p{num_individuals}")
+    plt.savefig(
+        Path()
+        / f"fitness_dynamics_{type(population[i]).__name__}_symmetrical={symmetrical}_water={weightless}_terrain={terrain.name}_g{num_generations}_p{num_individuals}"
+    )
 
     for i, individual in enumerate(population):
         #      g = individual.mutate(rng)
@@ -292,4 +313,4 @@ def run_experiment(
 
 
 if __name__ == "__main__":
-    run_experiment(1, 2, 0,terrain_type=1)
+    run_experiment(1, 2, 0, terrain_type=1)
