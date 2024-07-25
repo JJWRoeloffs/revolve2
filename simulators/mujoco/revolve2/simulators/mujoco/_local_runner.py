@@ -2,6 +2,7 @@ import concurrent.futures
 import math
 import os
 import tempfile
+from typing import Callable
 
 import cv2
 import mujoco
@@ -25,6 +26,8 @@ try:
     logging.root.removeHandler(logging.root.handlers[-1])
 except Exception as e:
     print("Failed to fix absl logging bug", e)
+    import logging
+
     pass
 
 from pyrr import Quaternion, Vector3
@@ -220,6 +223,14 @@ class LocalRunner(Runner):
         :param record_settings: Optional settings for recording the runnings. If None, no recording is made.
         :returns: List of simulation states in ascending order of time.
         """
+
+        def try_result(f):
+            try:
+                return f()
+            except Exception:
+                logging.warn("EXCEPTION IN MUJOCO: setting fitness to 0")
+                return None
+
         logging.info("Starting simulation batch with mujoco.")
 
         control_step = 1 / batch.control_frequency
@@ -247,7 +258,7 @@ class LocalRunner(Runner):
                 )
                 for env_index, env_descr in enumerate(batch.environments)
             ]
-            results = BatchResults([future.result() for future in futures])
+            results = BatchResults([try_result(future.result) for future in futures])
 
         logging.info("Finished batch.")
 
@@ -362,9 +373,9 @@ class LocalRunner(Runner):
 
             for body in posed_actor.actor.bodies:
                 for collision in body.collisions:
-                    robot.find(
-                        "geom", collision.name
-                    ).rgba = collision.color.to_normalized_rgba_list()
+                    robot.find("geom", collision.name).rgba = (
+                        collision.color.to_normalized_rgba_list()
+                    )
 
             for joint in posed_actor.actor.joints:
                 # Add rotor inertia to joints. This value is arbitrarily chosen and appears stable enough.
@@ -412,9 +423,9 @@ class LocalRunner(Runner):
         for heightmap in heightmaps:
             for x in range(len(heightmap.heights)):
                 for y in range(len(heightmap.heights[0])):
-                    model.hfield_data[
-                        y * len(heightmap.heights) + x
-                    ] = heightmap.heights[x][y]
+                    model.hfield_data[y * len(heightmap.heights) + x] = (
+                        heightmap.heights[x][y]
+                    )
             offset += len(heightmap.heights) * len(heightmap.heights[0])
 
         return model
@@ -470,6 +481,6 @@ class LocalRunner(Runner):
             data.qpos[qindex] = angle
 
             # Set the joint velocity to zero.
-            data.qvel[
-                qindex : qindex + model.jnt_dofadr[i + 1]
-            ] = 0.0  # Again, skip free joint.
+            data.qvel[qindex : qindex + model.jnt_dofadr[i + 1]] = (
+                0.0  # Again, skip free joint.
+            )
